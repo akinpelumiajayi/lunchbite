@@ -36,71 +36,99 @@ external eval library):
 - **Hit Rate@K** — fraction of queries where at least one relevant result appears
   in the top-K
 
-### A2. Results at K=5 — TF-IDF semantic search [REAL]
+> **These numbers were regenerated.** The previous Part A described a TF-IDF
+> retriever that no longer exists (replaced by `all-MiniLM-L6-v2` sentence
+> embeddings) and was scored against a golden set labelled for a 9-recipe
+> corpus while the corpus held 29. Reproduce with `python eval/eval_retrieval.py`.
+
+### A2. Results at K=5 — dense retrieval (all-MiniLM-L6-v2) [REAL]
 
 | Category | Precision@5 | Recall@5 | MRR | NDCG@5 | Hit Rate@5 |
 |----------|------------|---------|-----|--------|-----------|
-| Recipes (n=7) | 0.343 | 0.819 | 0.786 | 0.828 | 1.000 |
-| Allergen rules (n=5) | 0.200 | 0.800 | 0.600 | 0.652 | 0.800 |
-| Nutrition guidelines (n=5) | 0.200 | 1.000 | 0.740 | 0.804 | 1.000 |
-| **Overall (n=17)** | **0.282** | **0.925** | **0.776** | **0.828** | **1.000** |
+| Recipes (n=7) | 0.486 | 0.497 | 0.667 | 0.569 | 0.714 |
+| Allergen rules (n=5) | 0.240 | 0.900 | 0.900 | 0.877 | 1.000 |
+| Nutrition guidelines (n=5) | 0.200 | 1.000 | 0.840 | 0.877 | 1.000 |
+| **Overall (n=17)** | **0.329** | **0.764** | **0.786** | **0.750** | **0.882** |
+
+Recipe queries score markedly worse than the two document categories. That is
+the honest shape of this system: guideline and allergen-rule queries have one
+obviously-matching chunk, whereas recipe queries ask for a *set* of recipes
+satisfying a constraint, and two of the seven are absence queries the retriever
+cannot answer at all (see A4).
 
 ### A3. Precision/Recall trade-off across K [REAL]
 
 | K | Precision@K | Recall@K | NDCG@K | Hit Rate@K |
 |---|------------|---------|--------|-----------|
-| 1 | 0.647 | 0.502 | 0.706 | 0.706 |
-| 3 | 0.431 | 0.847 | 0.814 | 0.941 |
-| 5 | 0.282 | 0.925 | 0.828 | 1.000 |
-| 8 | 0.213 | 0.978 | 0.857 | 1.000 |
+| 1 | 0.706 | 0.499 | 0.706 | 0.706 |
+| 3 | 0.431 | 0.656 | 0.729 | 0.824 |
+| 5 | 0.329 | 0.764 | 0.750 | 0.882 |
+| 8 | 0.235 | 0.789 | 0.767 | 1.000 |
+
+Precision falling as K grows is arithmetic, not degradation: most queries here
+have a single relevant chunk, so Precision@K is capped at 1/K. Hit Rate rising
+to 1.000 at K=8 is the meaningful line — every query has its answer retrieved
+by depth 8, which is why the pipeline retrieves 9.
 
 ### A4. Multi-retriever comparison [REAL]
 
-`eval/eval_compare_retrievers.py` evaluated four retrieval methods using the
-same 17-query labeled set. Results at K=5, all 17 queries:
+`eval/eval_compare_retrievers.py` evaluates the four retrieval configurations
+the pipeline can be built from. Results at K=5 over the 7 **recipe** queries:
 
-| Retriever | MRR | NDCG@5 | Recall@5 | Hit Rate@5 |
-|-----------|-----|--------|---------|-----------|
-| TF-IDF (baseline) | 0.700 | 0.740 | 0.878 | 1.000 |
-| BM25 (k1=1.0, b=0.4) | 0.886 | 0.886 | — | — |
-| RRF fused (BM25 + TF-IDF) | 0.864 | 0.864 | — | — |
+| Retriever | P@5 | R@5 | MRR | NDCG@5 | Hit Rate@5 |
+|-----------|-----|-----|-----|--------|-----------|
+| BM25 (lexical only, k1=1.0 b=0.4) | 0.486 | 0.456 | 0.763 | 0.555 | 0.857 |
+| Dense (all-MiniLM-L6-v2) | 0.486 | 0.497 | 0.667 | 0.569 | 0.714 |
+| Hybrid (RRF fusion, k=60) | 0.571 | 0.568 | 0.695 | 0.622 | 0.857 |
+| **Hybrid + cross-encoder rerank** | **0.629** | **0.571** | **0.905** | **0.727** | **1.000** |
 
-*Note: BM25 hyperparameters were tuned against this eval set via
-`bm25_search.tune_bm25_hyperparameters()` — they are not library defaults.*
+*Scope: recipe queries only. The BM25 index is built over recipe chunks, so it
+cannot serve the guideline or allergen-rule queries; including them would compare
+index coverage rather than retrieval quality.*
 
-Negation-specific queries only ("milk-free dairy-free lunch", "egg-free lunch
-option", "gluten-free wheat-free lunch"):
+**Key finding — each architectural stage earns its place.** Hybrid RRF fusion
+(NDCG@5 = 0.622) beats the better of its two inputs (0.569), and the
+cross-encoder adds a further substantial gain (0.727, with MRR 0.905 and Hit
+Rate 1.000). A pipeline paying for two retrievers, a fusion step and a
+cross-encoder needs exactly this evidence; had fusion not beaten its parts, the
+honest conclusion would have been to simplify.
 
-| Retriever | NDCG@5 (negation queries) |
-|-----------|--------------------------|
-| TF-IDF | 0.775 |
-| Local neural (skip-gram + negation-aware pooling) | 0.851 |
-| BM25 | 0.696 |
-| RRF fused | 0.823 |
-
-**Key finding:** BM25 is the strongest retriever overall (NDCG@5=0.886) but
-the worst on negation-specific queries (0.696) because it is purely lexical and
-cannot distinguish "milk-free" from "contains milk". The local neural skip-gram
-model with negation-aware pooling performs best on those specific queries (0.851)
-because the polarity-flip mechanism explicitly inverts the word vector contribution
-when a negation cue ("free", "without", "no") precedes an allergen term.
+**Second finding — retrieval cannot answer absence queries.** Both
+`gluten-free wheat-free lunch` and `milk-free dairy-free lunch` score
+NDCG@5 = 0.00 for the dense retriever. The reason is structural: a gluten-free
+recipe does not contain the string "gluten-free", it simply lacks wheat, and an
+embedding has no way to represent an absent ingredient. This is a direct
+argument for the architecture under test — allergen exclusion is enforced by the
+deterministic symbolic layer precisely because retrieval demonstrably cannot do
+it. An earlier version of this report claimed a "negation-aware pooling"
+retriever solved this; no such component exists in the codebase.
 
 ### A5. Interpretation
 
-**Why Precision@K looks low:** Precision@5=0.282 looks bad but is a structural
-artefact of the corpus size, not a quality problem. When only 1–3 relevant
-chunks exist across 38 total, asking for K=5 results mathematically caps
-precision below 1.0 even with perfect ranking. MRR and NDCG are the meaningful
-metrics at this scale because they reward rank position.
+**Why Precision@K looks low:** Precision@5=0.329 is a structural artefact of the
+corpus shape, not a quality problem. When only 1–3 relevant chunks exist across
+58 total, asking for K=5 mathematically caps precision below 1.0 even with
+perfect ranking. MRR and NDCG are the meaningful metrics at this scale because
+they reward rank position.
 
-**The negation blind spot:** The "milk-free dairy-free lunch" query achieves
-Recall@5=0.40 with TF-IDF — only 2 of the 5 genuinely milk-free recipes appear
-in the top 5. This is the documented, measured consequence of using a bag-of-words
-model to represent absence. The neuro-symbolic pipeline compensates structurally:
-even if a milk-containing recipe ranks first in retrieval, the symbolic pre-filter
-removes it before the LLM is called. The "free from X, Y, Z" sentences added to
-each recipe chunk in `document_loader.py` improve this to 3/5 for all retrieval
-methods by providing explicit textual evidence for absence.
+**The negation blind spot:** Both absence queries score NDCG@5 = 0.00 for the
+dense retriever. `gluten-free wheat-free lunch` returns none of the four
+genuinely gluten-free recipes, and `milk-free dairy-free lunch` likewise fails
+to surface them in the top 5. This is the measured consequence of asking an
+embedding to represent an *absent* ingredient: a gluten-free recipe does not say
+"gluten-free", it simply lacks wheat, so there is no textual signal to match.
+
+The neuro-symbolic pipeline compensates structurally rather than by improving
+retrieval: even when a milk-containing recipe ranks first, the symbolic
+pre-filter removes it before the LLM is called. This is the clearest empirical
+argument in the artefact for a symbolic layer — the failure is not a tuning
+problem that a better embedding would fix, it is a representational limit.
+
+The "free from X, Y, Z" sentences added to each recipe chunk in
+`document_loader.py` are intended to supply exactly that missing textual
+evidence. On the current corpus they are not sufficient to lift these queries
+above zero, which is worth stating plainly rather than presenting the mitigation
+as though it worked.
 
 **One honest labelling bug found and fixed:** The "coeliac disease gluten free"
 allergen query initially scored MRR=0, NDCG=0. Root-cause: a wrong chunk ID in
@@ -258,11 +286,12 @@ faithfulness scoring mechanism is genuinely sensitive.
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| Retrieval Hit Rate@5 | 1.000 (17/17 queries) | REAL |
-| Retrieval MRR (TF-IDF) | 0.776 | REAL |
-| Retrieval NDCG@5 (TF-IDF) | 0.828 | REAL |
-| BM25 NDCG@5 (tuned) | 0.886 | REAL |
-| RRF-fused NDCG@5 | 0.864 | REAL |
+| Retrieval Hit Rate@5 (dense, 17 queries) | 0.882 | REAL |
+| Retrieval MRR (dense, 17 queries) | 0.786 | REAL |
+| Retrieval NDCG@5 (dense, 17 queries) | 0.750 | REAL |
+| BM25 NDCG@5 (7 recipe queries) | 0.555 | REAL |
+| RRF-fused NDCG@5 (7 recipe queries) | 0.622 | REAL |
+| Hybrid + cross-encoder NDCG@5 (7 recipe queries) | 0.727 | REAL |
 | Baseline allergen violation rate | 20.0% | MOCK BENCHMARK |
 | Neuro-symbolic allergen violation rate | 0.0% | MOCK BENCHMARK |
 | Baseline adversarial bypass rate | 66.7% | MOCK BENCHMARK |

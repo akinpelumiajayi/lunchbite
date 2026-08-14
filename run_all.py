@@ -214,14 +214,43 @@ def step_evaluate(results_path: str) -> str:
     return out_path
 
 
-def step_report(results_path: str, eval_path: str) -> str:
+def step_retrieval_eval() -> Optional[str]:
+    """
+    Retrieval quality against the hand-labelled golden set.
+
+    Retrieval is half the architecture, but these numbers never reached the
+    comparative report — eval/ was only ever run by hand, so the report argued
+    for a hybrid retriever without showing that hybrid beats its parts.
+
+    Non-fatal: a failure here should not cost you the benchmark results.
+    """
+    print("\n" + "=" * 60)
+    print("STEP 3b: Evaluating retrieval quality (Aim 5)")
+    print("=" * 60)
+    try:
+        from eval_compare_retrievers import compare
+        results = compare(k=5)
+        out_dir = ROOT / "benchmark" / "results"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = str(out_dir / f"retrieval_eval_{time.strftime('%Y%m%d_%H%M%S')}.json")
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(results, f, indent=2)
+        print(f"Retrieval metrics saved to: {out_path}")
+        return out_path
+    except Exception as e:                                        # noqa: BLE001
+        print(f"Retrieval evaluation skipped ({type(e).__name__}: {e})")
+        return None
+
+
+def step_report(results_path: str, eval_path: str,
+                retrieval_path: Optional[str] = None) -> str:
     print("\n" + "=" * 60)
     print("STEP 4: Generating comparative report (Aim 5)")
     print("=" * 60)
     from generate_report import generate_report
     ts = time.strftime("%Y%m%d_%H%M%S")
     out_path = str(ROOT / "report" / f"COMPARATIVE_REPORT_{ts}.md")
-    generate_report(results_path, eval_path, out_path)
+    generate_report(results_path, eval_path, out_path, retrieval_path=retrieval_path)
     return out_path
 
 
@@ -278,7 +307,8 @@ def main() -> None:
                                       model_override=args.model, repeats=args.repeats)
 
     eval_path = step_evaluate(results_path)
-    report_path = step_report(results_path, eval_path)
+    retrieval_path = step_retrieval_eval()
+    report_path = step_report(results_path, eval_path, retrieval_path)
 
     elapsed = time.perf_counter() - t_start
     print(f"\n{'=' * 60}")

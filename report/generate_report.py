@@ -71,6 +71,7 @@ def generate_report(
     results_path: str,
     eval_path: Optional[str] = None,
     out_path: Optional[str] = None,
+    retrieval_path: Optional[str] = None,
 ) -> str:
     # ── Load data ─────────────────────────────────────────────────────────────
     with open(results_path, encoding="utf-8") as f:
@@ -92,6 +93,13 @@ def generate_report(
 
     safety: Dict[str, Any] = eval_data.get("safety") or {}
     llm_m:  Optional[Dict[str, Any]] = eval_data.get("llm_metrics")
+
+    # Retrieval quality. Optional: a report from before this was wired in, or a
+    # run where the cross-encoder was unavailable, still renders without it.
+    retrieval: Dict[str, Any] = {}
+    if retrieval_path and os.path.exists(retrieval_path):
+        with open(retrieval_path, encoding="utf-8") as f:
+            retrieval = json.load(f)
 
     # Which pipeline modes are present in this results file
     present_modes = meta.get("pipelines") or [
@@ -478,8 +486,78 @@ def generate_report(
 
     hr()
 
-    # ── 4. Per-Category Breakdown ─────────────────────────────────────────────
-    L += ["## 4. Per-Category Breakdown", ""]
+    # ── 4. Retrieval Quality ──────────────────────────────────────────────────
+    L += ["## 4. Retrieval Quality", ""]
+
+    if retrieval and retrieval.get("retrievers"):
+        k = retrieval.get("k", 5)
+        nq = retrieval.get("n_queries", "?")
+        L += [
+            f"Measured against the hand-labelled golden set in `eval/eval_dataset.py`",
+            f"(K={k}, {nq} recipe queries). The pipeline pays for two retrievers, a fusion",
+            "step and a cross-encoder; this is the evidence that the cost is justified.",
+            "",
+            "| Retriever | P@K | R@K | MRR | NDCG@K | Hit Rate |",
+            "|---|---|---|---|---|---|",
+        ]
+        labels = {"bm25": "BM25 (lexical only)", "semantic": "Dense (MiniLM)",
+                  "hybrid_rrf": "Hybrid (RRF fusion)", "hybrid_rerank": "Hybrid + cross-encoder"}
+        ok = {}
+        for name, m in retrieval["retrievers"].items():
+            label = labels.get(name, name)
+            if "error" in m:
+                L.append(f"| {label} | — | — | — | — | — |")
+                continue
+            ok[name] = m
+            L.append(f"| {label} | {m['precision_at_k']:.3f} | {m['recall_at_k']:.3f} | "
+                     f"{m['mrr']:.3f} | {m['ndcg_at_k']:.3f} | {m['hit_rate_at_k']:.3f} |")
+
+        if ok:
+            best = max(ok, key=lambda n: ok[n]["ndcg_at_k"])
+            L += ["", f"**Best by NDCG@{k}: {labels.get(best, best)} "
+                      f"({ok[best]['ndcg_at_k']:.3f}).**"]
+            # State plainly whether each architectural stage earned its place.
+            if "hybrid_rrf" in ok and "bm25" in ok and "semantic" in ok:
+                fused = ok["hybrid_rrf"]["ndcg_at_k"]
+                parts = max(ok["bm25"]["ndcg_at_k"], ok["semantic"]["ndcg_at_k"])
+                L.append("")
+                if fused > parts:
+                    L.append(f"Fusion earns its place: hybrid RRF ({fused:.3f}) beats the better "
+                             f"of its two inputs ({parts:.3f}).")
+                else:
+                    L.append(f"Fusion does **not** earn its place here: hybrid RRF ({fused:.3f}) "
+                             f"does not beat the better of its inputs ({parts:.3f}). The honest "
+                             "conclusion is to simplify the retriever.")
+            if "hybrid_rerank" in ok and "hybrid_rrf" in ok:
+                rr, fu = ok["hybrid_rerank"]["ndcg_at_k"], ok["hybrid_rrf"]["ndcg_at_k"]
+                if rr > fu:
+                    L.append(f"Re-ranking earns its place: {rr:.3f} vs {fu:.3f} NDCG@{k}.")
+                else:
+                    L.append(f"Re-ranking does **not** earn its place here: {rr:.3f} vs "
+                             f"{fu:.3f} NDCG@{k}.")
+
+        L += [
+            "",
+            "> **Scope:** recipe queries only. The BM25 index covers recipe chunks, so the",
+            "> guideline and allergen-rule queries cannot be served by every method and",
+            "> including them would compare index coverage rather than retrieval.",
+            "> **Known weakness:** absence queries. A gluten-free recipe does not say",
+            "> \"gluten-free\", it simply lacks wheat, and an embedding cannot represent an",
+            "> absent ingredient. This is why allergen safety is enforced by the symbolic",
+            "> layer rather than by retrieval.",
+        ]
+    else:
+        L += [
+            "_No retrieval evaluation in this run._",
+            "",
+            "Run `python eval/eval_compare_retrievers.py`, or a full `python run_all.py`,",
+            "which now runs it as step 3b.",
+        ]
+
+    hr()
+
+    # ── 5. Per-Category Breakdown ─────────────────────────────────────────────
+    L += ["## 5. Per-Category Breakdown", ""]
 
     L += [
         "| Category | N | " + " | ".join(f"{MODE_LABELS[m]} violations" for m in present_modes) + " |",
@@ -494,8 +572,8 @@ def generate_report(
 
     hr()
 
-    # ── 5. Case-by-Case Safety Audit ─────────────────────────────────────────
-    L += ["## 5. Case-by-Case Safety Audit", ""]
+    # ── 6. Case-by-Case Safety Audit ─────────────────────────────────────────
+    L += ["## 6. Case-by-Case Safety Audit", ""]
     L += [
         "✅ safe  ❌ VIOLATION  ⚠️ no menus / error  🔄 adversarial injection",
         "",
@@ -525,8 +603,8 @@ def generate_report(
 
     hr()
 
-    # ── 6. Data Sources and Citations ─────────────────────────────────────────
-    L += ["## 6. Data Sources and Citations", ""]
+    # ── 7. Data Sources and Citations ─────────────────────────────────────────
+    L += ["## 7. Data Sources and Citations", ""]
     L += [
         "All recipe and constraint data is drawn from publicly licensed sources.",
         "Full citation metadata is in `data/data_sources.json`.",
@@ -559,8 +637,8 @@ def generate_report(
 
     hr()
 
-    # ── 7. Discussion ─────────────────────────────────────────────────────────
-    L += ["## 7. Discussion", ""]
+    # ── 8. Discussion ─────────────────────────────────────────────────────────
+    L += ["## 8. Discussion", ""]
 
     # 7a Safety
     L += [
