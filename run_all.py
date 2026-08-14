@@ -35,6 +35,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "src" / "graphs"))
 sys.path.insert(0, str(ROOT / "benchmark"))
 sys.path.insert(0, str(ROOT / "report"))
+sys.path.insert(0, str(ROOT / "eval"))
 
 from console import enable_utf8_stdout
 
@@ -238,7 +239,12 @@ def step_retrieval_eval() -> Optional[str]:
         print(f"Retrieval metrics saved to: {out_path}")
         return out_path
     except Exception as e:                                        # noqa: BLE001
-        print(f"Retrieval evaluation skipped ({type(e).__name__}: {e})")
+        # Non-fatal so a cross-encoder download failure does not cost you the
+        # benchmark — but say loudly what the report will be missing, because a
+        # quietly-skipped step is how retrieval went unmeasured in the first place.
+        print(f"  WARNING: retrieval evaluation FAILED ({type(e).__name__}: {e})")
+        print("  The report will have no retrieval-quality section. Reproduce with:")
+        print("    python eval/eval_compare_retrievers.py")
         return None
 
 
