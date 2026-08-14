@@ -133,14 +133,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--provider", choices=["groq", "ollama"], default=None,
                         help="Force a specific LLM provider (default: auto-detect from .env)")
-    # Legacy flags
-    parser.add_argument("--groq-key", default=None, help="(legacy) set GROQ_API_KEY in .env instead")
+    # No --groq-key: a key on the command line lands in shell history and is
+    # visible in the process table. Use .env (gitignored).
     parser.add_argument("--anthropic-key", default=None,
                         help="(legacy) this eval now uses Groq/Ollama, not Anthropic")
     args = parser.parse_args()
 
-    if args.groq_key:
-        os.environ["GROQ_API_KEY"] = args.groq_key
     if args.anthropic_key:
         print("Note: --anthropic-key is no longer used. "
               "This eval now uses Groq or Ollama (set in .env).")

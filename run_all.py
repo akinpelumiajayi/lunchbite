@@ -25,7 +25,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -59,6 +58,14 @@ REQUIRED_PACKAGES = {
 
 
 def ensure_packages() -> None:
+    """
+    Checks imports and reports what is missing. Deliberately does NOT install.
+
+    Installing as a side effect of running a benchmark mutates the environment
+    the results are supposed to describe — the run that installs its own
+    dependencies is not the run you can reproduce later. requirements.txt is the
+    single source of truth; this only maps import names to it.
+    """
     missing = []
     for module, pip_spec in REQUIRED_PACKAGES.items():
         try:
@@ -66,12 +73,10 @@ def ensure_packages() -> None:
         except ImportError:
             missing.append(pip_spec)
     if missing:
-        print("Installing missing packages: " + ", ".join(missing))
-        result = subprocess.run([sys.executable, "-m", "pip", "install"] + missing, check=False)
-        if result.returncode != 0:
-            print("ERROR: Package installation failed. Run: pip install -r requirements.txt")
-            sys.exit(1)
-        print("Packages installed.\n")
+        print("ERROR: missing required packages:\n  " + "\n  ".join(missing))
+        print("\nInstall them, then re-run:")
+        print("  pip install -r requirements.txt")
+        sys.exit(1)
 
 
 # ── Steps ─────────────────────────────────────────────────────────────────────
@@ -84,18 +89,20 @@ def step_setup() -> None:
     setup_main()
 
 
-def step_benchmark(provider: Optional[str], use_mock: bool, model_override: Optional[str]) -> str:
+def step_benchmark(provider: Optional[str], use_mock: bool, model_override: Optional[str],
+                   repeats: int = 1) -> str:
     print("\n" + "=" * 60)
     print("STEP 2: Running benchmark — all 4 pipelines, 30 cases (Aims 3 & 4)")
     print("=" * 60)
     if use_mock:
-        return _run_mock_benchmark()
+        return _run_mock_benchmark(repeats=repeats)
     from runner import run_benchmark
     return run_benchmark(provider=provider, model_override=model_override,
-                         output_dir=str(ROOT / "benchmark" / "results"))
+                         output_dir=str(ROOT / "benchmark" / "results"),
+                         repeats=repeats)
 
 
-def _run_mock_benchmark() -> str:
+def _run_mock_benchmark(repeats: int = 1) -> str:
     import uuid
     from unittest.mock import MagicMock
     from langchain_core.messages import AIMessage
@@ -170,10 +177,14 @@ def _run_mock_benchmark() -> str:
     print(f"Running {len(BENCHMARK_CASES)} cases across all 4 pipelines...\n")
 
     results = []
-    for case in BENCHMARK_CASES:
-        print(f"  [{case.case_id}] {case.description}")
-        r = run_single_case(case, no_llm_graph, neural_graph, neuro_graph, no_rag_graph)
-        results.append(r)
+    for rep in range(repeats):
+        if repeats > 1:
+            print(f"\n--- repeat {rep + 1}/{repeats} ---")
+        for case in BENCHMARK_CASES:
+            print(f"  [{case.case_id}] {case.description}")
+            r = run_single_case(case, no_llm_graph, neural_graph, neuro_graph, no_rag_graph)
+            r["repeat"] = rep
+            results.append(r)
 
     from runner import build_run_metadata
 
@@ -181,9 +192,11 @@ def _run_mock_benchmark() -> str:
     out_dir = ROOT / "benchmark" / "results"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = str(out_dir / f"mock_run_{ts}.json")
+    meta = build_run_metadata("mock", len(BENCHMARK_CASES), ts, synthetic=True)
+    meta["repeats"] = repeats
+    meta["n_result_rows"] = len(results)
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump({"metadata": build_run_metadata("mock", len(results), ts, synthetic=True),
-                   "results": results}, f, indent=2)
+        json.dump({"metadata": meta, "results": results}, f, indent=2)
     print(f"\nMock results saved to: {out_path}")
     return out_path
 
@@ -226,14 +239,13 @@ def main() -> None:
     parser.add_argument("--model", default=None, help="Override generator model name")
     parser.add_argument("--results", default=None, help="Path to existing results JSON")
     parser.add_argument("--skip-setup", action="store_true")
-    parser.add_argument("--groq-key", default=None, help="(legacy) prefer GROQ_API_KEY in .env")
-    parser.add_argument("--langsmith-key", default=None, help="(legacy) prefer LANGSMITH_API_KEY in .env")
+    parser.add_argument("--repeats", type=int, default=1,
+                        help="Runs per case per pipeline. >1 reports mean +/- SD "
+                             "alongside the paired significance test. Try 5.")
+    # No --groq-key / --langsmith-key: a key passed on the command line is
+    # recorded in shell history and is visible to any other user via the process
+    # table for the lifetime of the run. Keys belong in .env, which is gitignored.
     args = parser.parse_args()
-
-    if args.groq_key:
-        os.environ["GROQ_API_KEY"] = args.groq_key
-    if args.langsmith_key:
-        os.environ["LANGSMITH_API_KEY"] = args.langsmith_key
 
     print_provider_status()
     print()
@@ -263,7 +275,7 @@ def main() -> None:
         print(f"\nUsing existing results: {results_path}")
     else:
         results_path = step_benchmark(provider=args.provider, use_mock=args.mock,
-                                      model_override=args.model)
+                                      model_override=args.model, repeats=args.repeats)
 
     eval_path = step_evaluate(results_path)
     report_path = step_report(results_path, eval_path)

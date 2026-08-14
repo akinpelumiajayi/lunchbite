@@ -182,6 +182,7 @@ def run_benchmark(
     provider: Optional[str] = None,
     model_override: Optional[str] = None,
     output_dir: str = "benchmark/results",
+    repeats: int = 1,
 ) -> str:
     from llm_provider import get_llm, configure_langsmith
     from graphs.build_graphs import (build_no_llm_graph, build_neural_rag_graph,
@@ -202,17 +203,28 @@ def run_benchmark(
     no_rag_graph   = build_no_rag_graph(llm)
     print(f"All 4 graphs compiled. Running {len(BENCHMARK_CASES)} cases...\n")
 
+    # Each case is run `repeats` times per pipeline. At temperature 0.1 the
+    # generator is not deterministic, so a single pass gives a point estimate
+    # with no stated uncertainty — 0.333 vs 0.0 over 30 cases could be noise.
+    # Repeats let the evaluator report mean +/- SD and run a paired test.
     results: List[Dict[str, Any]] = []
-    for case in BENCHMARK_CASES:
-        print(f"  [{case.case_id}] {case.description}")
-        results.append(run_single_case(case, no_llm_graph, neural_graph, neuro_graph, no_rag_graph))
+    for rep in range(repeats):
+        if repeats > 1:
+            print(f"\n--- repeat {rep + 1}/{repeats} ---")
+        for case in BENCHMARK_CASES:
+            print(f"  [{case.case_id}] {case.description}")
+            r = run_single_case(case, no_llm_graph, neural_graph, neuro_graph, no_rag_graph)
+            r["repeat"] = rep
+            results.append(r)
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     ts = time.strftime("%Y%m%d_%H%M%S")
     out_path = os.path.join(output_dir, f"run_{ts}.json")
+    meta = build_run_metadata(provider_name, len(BENCHMARK_CASES), ts)
+    meta["repeats"] = repeats
+    meta["n_result_rows"] = len(results)
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump({"metadata": build_run_metadata(provider_name, len(results), ts),
-                   "results": results}, f, indent=2)
+        json.dump({"metadata": meta, "results": results}, f, indent=2)
     print(f"\nResults saved to: {out_path}")
     return out_path
 
@@ -222,8 +234,9 @@ if __name__ == "__main__":
     parser.add_argument("--provider", choices=["groq", "ollama"], default=None)
     parser.add_argument("--model", default=None)
     parser.add_argument("--output-dir", default="benchmark/results")
-    parser.add_argument("--groq-key", default=None)
+    parser.add_argument("--repeats", type=int, default=1,
+                        help="Runs per case per pipeline. >1 enables mean+/-SD and "
+                             "the paired significance test. 3-5 is a sensible range.")
     args = parser.parse_args()
-    if args.groq_key:
-        os.environ["GROQ_API_KEY"] = args.groq_key
-    run_benchmark(provider=args.provider, model_override=args.model, output_dir=args.output_dir)
+    run_benchmark(provider=args.provider, model_override=args.model,
+                  output_dir=args.output_dir, repeats=args.repeats)

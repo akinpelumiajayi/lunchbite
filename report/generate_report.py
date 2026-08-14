@@ -294,6 +294,66 @@ def generate_report(
         "> post-filter gate (hallucinated IDs + allergen violations proposed by LLM).",
     ]
 
+    # ── 2.1 Statistical significance ──────────────────────────────────────────
+    significance = eval_data.get("significance") or {}
+    variance = eval_data.get("repeat_variance") or {}
+    if significance:
+        L += [
+            "",
+            "### 2.1 Statistical significance (McNemar's exact test)",
+            "",
+            "Every pipeline is scored on an identical case list, so the arms are *paired*.",
+            "McNemar's test uses only the cases where two arms disagree — the cases where",
+            "one recommended something unsafe and the other did not — which is precisely",
+            "the evidence that one is safer. The exact binomial form is used rather than",
+            "the chi-square approximation because the discordant counts here are small.",
+            "",
+            "| Comparison | Violations (A vs B) | Discordant (b/c) | p (exact) | Significant (α=0.05) |",
+            "|---|---|---|---|---|",
+        ]
+        for key, s in significance.items():
+            a, b_mode = s["mode_a"], s["mode_b"]
+            p = s["p_value"]
+            p_str = f"{p:.2e}" if p is not None and p < 0.001 else (f"{p:.4f}" if p is not None else "—")
+            L.append(
+                f"| `{a}` vs `{b_mode}` | {s['a_violations']} vs {s['b_violations']} | "
+                f"{s['a_safe_b_unsafe']}/{s['a_unsafe_b_safe']} | {p_str} | "
+                f"{'**yes**' if s['significant_at_0_05'] else 'no'} |"
+            )
+        L += [
+            "",
+            "> *b* = cases where A was safe and B was not; *c* = the reverse. Cases where",
+            "> both arms agree carry no information about which is better and are excluded",
+            "> by the test.",
+        ]
+
+        n_rep = variance.get("n_repeats", 1)
+        if n_rep and n_rep > 1:
+            L += [
+                "",
+                f"**Stability across {n_rep} repeats** (mean ± SD of the violation rate):",
+                "",
+                "| Pipeline | Violation rate (all cases) | Coverage | Safe & useful |",
+                "|---|---|---|---|",
+            ]
+            for m in present_modes:
+                blk = variance.get(m) or {}
+                def ms(key):
+                    d = blk.get(key) or {}
+                    if d.get("mean") is None:
+                        return "—"
+                    return f"{d['mean']:.3f}" + (f" ± {d['sd']:.3f}" if d.get("sd") is not None else "")
+                L.append(f"| {MODE_LABELS[m]} | {ms('allergen_violation_rate_over_all_cases')} "
+                         f"| {ms('coverage')} | {ms('safe_and_useful_rate')} |")
+        else:
+            L += [
+                "",
+                "> **Single pass.** Each case was run once per pipeline, so the rates above",
+                "> carry no run-to-run uncertainty. The generator runs at a non-zero",
+                "> temperature, so repeated runs can differ. Re-run with `--repeats 5` to",
+                "> report mean ± SD alongside the significance test.",
+            ]
+
     hr()
 
     # ── 3. LLM-as-Judge Metrics ───────────────────────────────────────────────

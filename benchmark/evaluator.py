@@ -364,6 +364,20 @@ def evaluate(results_path: str, run_llm_judge: Optional[bool] = None) -> Dict[st
     safety = compute_safety_metrics(results)
     print("Safety metrics computed (deterministic).")
 
+    # Uncertainty and significance. Both are deterministic and cost nothing —
+    # a headline of 0.333 vs 0.000 with no stated uncertainty is the single
+    # weakest point in the comparison.
+    # Module is stats.py, not statistics.py: benchmark/ lands on sys.path[0],
+    # so the latter would shadow the stdlib `statistics` module process-wide.
+    from stats import mcnemar, repeat_variance
+    significance = {
+        "neurosymbolic_vs_neural_rag": mcnemar(results, "neurosymbolic", "neural_rag"),
+        "neurosymbolic_vs_no_rag": mcnemar(results, "neurosymbolic", "no_rag"),
+        "no_llm_vs_neural_rag": mcnemar(results, "no_llm", "neural_rag"),
+    }
+    variance = repeat_variance(results, compute_safety_metrics)
+    print("Significance tests computed (McNemar, exact).")
+
     should_run = run_llm_judge
     if should_run is None:
         from llm_provider import provider_available
@@ -381,6 +395,7 @@ def evaluate(results_path: str, run_llm_judge: Optional[bool] = None) -> Dict[st
             print(f"LLM-as-judge failed: {e}")
 
     return {"metadata": data.get("metadata", {}), "safety": safety,
+            "significance": significance, "repeat_variance": variance,
             "llm_metrics": llm_metrics, "n_cases": len(results)}
 
 
@@ -390,10 +405,8 @@ if __name__ == "__main__":
     parser.add_argument("results_path")
     parser.add_argument("--no-judge", action="store_true")
     parser.add_argument("--out", default=None)
-    parser.add_argument("--groq-key", default=None)
+    # No --groq-key: it lands in shell history and the process table. Use .env.
     args = parser.parse_args()
-    if args.groq_key:
-        os.environ["GROQ_API_KEY"] = args.groq_key
     scores = evaluate(args.results_path, run_llm_judge=False if args.no_judge else None)
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:

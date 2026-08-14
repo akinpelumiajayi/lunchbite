@@ -1,3 +1,9 @@
+# Minimum versions the code needs. For REPRODUCING a published benchmark result,
+# install from requirements.lock.txt instead — it pins the exact versions the
+# results were produced with, which are well ahead of the minimums below.
+#
+#   pip install -r requirements.lock.txt
+
 # ── Environment ───────────────────────────────────────────────────────────────
 python-dotenv>=1.0.0
 
