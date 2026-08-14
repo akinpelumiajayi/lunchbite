@@ -1,0 +1,30 @@
+# Secrets — never commit
+.env
+
+# Generated indexes — rebuilt by setup_database.py
+vectordb/
+
+# Benchmark results — generated output, not source
+benchmark/results/
+
+# Test / tooling caches
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

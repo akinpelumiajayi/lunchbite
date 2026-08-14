@@ -1,0 +1,40 @@
+# ── Environment ───────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0
+
+# ── Core RAG & vector store ───────────────────────────────────────────────────
+chromadb>=0.5.0
+rank-bm25>=0.2.2
+
+# ── LangChain / LangGraph / LangSmith ────────────────────────────────────────
+langchain>=1.3.0
+langchain-core>=0.3.0
+langchain-groq>=0.3.0
+langchain-ollama>=0.2.0
+langgraph>=0.3.0
+langsmith>=0.1.0
+
+# ── LLM providers (Groq and/or Ollama — NO Anthropic) ────────────────────────
+# Groq (cloud, free tier): get key at https://console.groq.com
+groq>=0.4.0
+# Ollama (local, no key): install from https://ollama.com, then: ollama pull llama3.2
+
+# ── Retrieval models (REQUIRED) ──────────────────────────────────────────────
+# Semantic retrieval uses all-MiniLM-L6-v2 and reranking uses
+# ms-marco-MiniLM-L-6-v2. Both download on first run (~90 MB each) and are
+# cached in ~/.cache/huggingface/. This is no longer an optional upgrade path:
+# the previous offline TF-IDF embedding backend has been removed.
+sentence-transformers>=3.0.0
+
+# ── Jupyter notebook ──────────────────────────────────────────────────────────
+notebook>=7.0.0
+ipykernel>=6.0.0
+nbconvert>=7.0.0
+
+# ── Charts (notebooks/lunch_rag_pipeline.ipynb) ──────────────────────────────
+matplotlib>=3.8.0
+
+# ── Tests (pytest tests/) ────────────────────────────────────────────────────
+pytest>=8.0.0
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+numpy>=1.26.0

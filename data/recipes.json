@@ -1,0 +1,1481 @@
+[
+  {
+    "id": "recipe_001",
+    "name": "Cheesy coleslaw with wholemeal pitta",
+    "source": "UK Government Lunchbox Recipe Booklet (NHS/PHE)",
+    "description": "Crunchy, cheesy coleslaw in a pitta. Serve with cherry tomatoes and a small box of raisins.",
+    "prep_time_mins": 10,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "ingredients": [
+      "1 teaspoon reduced-calorie mayonnaise",
+      "1 tablespoon low-fat Greek style yoghurt",
+      "1 thin slice of white cabbage, shredded",
+      "1 small carrot, grated",
+      "2 spring onions or a slice of onion, chopped",
+      "20g reduced-fat cheddar cheese, finely chopped or grated",
+      "Parsley, chopped (optional)",
+      "1 large wholemeal pitta bread"
+    ],
+    "extras_suggested": [
+      "5 cherry tomatoes",
+      "1 tablespoon low-fat Greek style yoghurt",
+      "200ml semi-skimmed milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1478,
+      "energy_kcal": 351,
+      "fat_g": 8.4,
+      "saturates_g": 3.4,
+      "carbohydrate_g": 47.8,
+      "sugars_g": 10.1,
+      "fibre_g": 7.3,
+      "protein_g": 17.4,
+      "salt_g": 1.2
+    },
+    "allergens_present": [
+      "milk",
+      "cereals containing gluten"
+    ],
+    "allergen_notes": "Contains wheat (pitta bread) and milk (cheese, yoghurt). Egg-free, nut-free, soya-free as written.",
+    "diet_tags": [
+      "vegetarian",
+      "nut-free",
+      "egg-free",
+      "fish-free"
+    ],
+    "meal_category": "sandwich/wrap",
+    "cultural_context": "British/Western lunchbox style",
+    "source_id": "src_001",
+    "source_url": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/school-packed-lunches/",
+    "source_licence": "Open Government Licence v3.0"
+  },
+  {
+    "id": "recipe_002",
+    "name": "Creamy hummus dip with pitta bread and vegetable sticks",
+    "source": "UK Government Lunchbox Recipe Booklet (NHS/PHE)",
+    "description": "Creamy chickpea dip, fun to eat, with pitta strips and vegetable sticks. Works well with a banana and a pot of sugar-free jelly.",
+    "prep_time_mins": 10,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "ingredients": [
+      "2 heaped tablespoons tinned chickpeas",
+      "Juice of half a lemon",
+      "1 tablespoon low-fat Greek style yoghurt",
+      "1 tablespoon olive oil",
+      "1/4 teaspoon paprika (or to taste)",
+      "1/4 teaspoon cumin (or to taste)",
+      "1 clove of garlic (peeled)",
+      "1 large wholemeal pitta bread, cut into strips",
+      "1 small carrot, cut into sticks",
+      "1 stick of celery, cut into sticks"
+    ],
+    "extras_suggested": [
+      "banana",
+      "sugar-free jelly pot",
+      "small bottle of water"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1906,
+      "energy_kcal": 454,
+      "fat_g": 15.6,
+      "saturates_g": 2.8,
+      "carbohydrate_g": 57.1,
+      "sugars_g": 8.5,
+      "fibre_g": 10.8,
+      "protein_g": 15.9,
+      "salt_g": 0.9
+    },
+    "allergens_present": [
+      "milk",
+      "cereals containing gluten",
+      "celery"
+    ],
+    "allergen_notes": "Contains wheat (pitta), milk (yoghurt), and celery (celery sticks). Nut-free, egg-free, fish-free, soya-free.",
+    "diet_tags": [
+      "vegetarian",
+      "nut-free",
+      "egg-free",
+      "fish-free"
+    ],
+    "meal_category": "dip/snack-style lunch",
+    "method_steps": [
+      "Put the chickpeas, lemon juice, yoghurt, oil, spices and garlic in a bowl.",
+      "Using a hand blender, mix together until smooth. Can be made the night before and stored in the fridge.",
+      "Serve with the pitta bread strips and carrot and celery sticks."
+    ],
+    "cultural_context": "British/Western lunchbox style, Middle Eastern-inspired hummus",
+    "source_id": "src_001",
+    "source_url": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/school-packed-lunches/",
+    "source_licence": "Open Government Licence v3.0"
+  },
+  {
+    "id": "recipe_003",
+    "name": "Egg mayonnaise and lettuce bap",
+    "source": "UK Government Lunchbox Recipe Booklet (NHS/PHE)",
+    "description": "Eggs are a great source of protein for growing kids. Works well with cherry tomatoes and a fruit snack pot.",
+    "prep_time_mins": 10,
+    "cook_time_mins": 12,
+    "serves": 1,
+    "ingredients": [
+      "1 egg",
+      "1 level tablespoon reduced-calorie mayonnaise",
+      "large pinch of black pepper",
+      "1 large wholemeal bap",
+      "small wedge of lettuce, to give 2 tablespoons when shredded"
+    ],
+    "extras_suggested": [
+      "5 cherry tomatoes",
+      "fruit snack pot (tinned fruit in juice)",
+      "200ml semi-skimmed milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1444,
+      "energy_kcal": 344,
+      "fat_g": 11.4,
+      "saturates_g": 2.4,
+      "carbohydrate_g": 39.4,
+      "sugars_g": 3.5,
+      "fibre_g": 7.1,
+      "protein_g": 17.3,
+      "salt_g": 1.2
+    },
+    "allergens_present": [
+      "egg",
+      "cereals containing gluten"
+    ],
+    "allergen_notes": "Contains egg and wheat (bap). Mayonnaise typically contains egg too. Milk-free, nut-free, fish-free, soya-free as written.",
+    "diet_tags": [
+      "vegetarian",
+      "nut-free",
+      "milk-free",
+      "fish-free"
+    ],
+    "meal_category": "sandwich/wrap",
+    "method_steps": [
+      "Place the egg in a small saucepan covered with water, bring to the boil and cook for 10 minutes. Plunge in cold water and leave to cool. Can be cooked the night before.",
+      "Remove shell and mash the egg with the mayonnaise and pepper.",
+      "Use to fill the bap, topping with the lettuce. Try cress or baby spinach instead of lettuce."
+    ],
+    "cultural_context": "British/Western lunchbox style",
+    "source_id": "src_001",
+    "source_url": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/school-packed-lunches/",
+    "source_licence": "Open Government Licence v3.0"
+  },
+  {
+    "id": "recipe_004",
+    "name": "Hummus and salad wrap",
+    "source": "UK Government Lunchbox Recipe Booklet (NHS/PHE)",
+    "description": "Simple to make and fun to eat. Try serving with cherry tomatoes and mixed berries with low-fat Greek style yoghurt.",
+    "prep_time_mins": 10,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "ingredients": [
+      "2 tablespoons reduced-fat hummus",
+      "1 large wholemeal wrap",
+      "1 small carrot, grated",
+      "small wedge of lettuce, to give 2 tablespoons when shredded"
+    ],
+    "extras_suggested": [
+      "5 cherry tomatoes",
+      "2 tablespoons frozen mixed berries and 3 tablespoons low-fat Greek style yoghurt",
+      "150ml fruit juice drink (no added sugar) or 200ml water"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1469,
+      "energy_kcal": 351,
+      "fat_g": 13.0,
+      "saturates_g": 2.7,
+      "carbohydrate_g": 42.4,
+      "sugars_g": 3.9,
+      "fibre_g": 10.3,
+      "protein_g": 10.8,
+      "salt_g": 1.6
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "sesame"
+    ],
+    "allergen_notes": "Contains wheat (wrap) and typically sesame (hummus is made from tahini/sesame paste, declare if shop-bought). Egg-free, milk-free (check hummus brand), nut-free, fish-free.",
+    "diet_tags": [
+      "vegan-friendly",
+      "nut-free",
+      "egg-free",
+      "fish-free"
+    ],
+    "meal_category": "sandwich/wrap",
+    "method_steps": [
+      "Spread the hummus over the wrap, then sprinkle on the carrot and lettuce.",
+      "Fold opposite edges of the wrap, then roll up and cut in half."
+    ],
+    "cultural_context": "British/Western lunchbox style, Middle Eastern-inspired hummus",
+    "source_id": "src_001",
+    "source_url": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/school-packed-lunches/",
+    "source_licence": "Open Government Licence v3.0"
+  },
+  {
+    "id": "recipe_005",
+    "name": "Salmon and salad bagel",
+    "source": "UK Government Lunchbox Recipe Booklet (NHS/PHE)",
+    "description": "Bagels are popular with kids, a good way to introduce fish. Works well with grapes and a plain rice cake.",
+    "prep_time_mins": 10,
+    "cook_time_mins": 1,
+    "serves": 1,
+    "ingredients": [
+      "1 wholemeal bagel",
+      "small can (105g) or half a large can of pink salmon",
+      "1 level tablespoon reduced-calorie mayonnaise",
+      "large pinch of black pepper",
+      "4 slices of cucumber",
+      "small wedge of lettuce, to give 2 tablespoons when shredded"
+    ],
+    "extras_suggested": [
+      "handful of grapes (about 12)",
+      "1 plain rice cake",
+      "200ml semi-skimmed milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1582,
+      "energy_kcal": 376,
+      "fat_g": 11.0,
+      "saturates_g": 1.9,
+      "carbohydrate_g": 40.2,
+      "sugars_g": 4.4,
+      "fibre_g": 5.6,
+      "protein_g": 26.2,
+      "salt_g": 1.5
+    },
+    "allergens_present": [
+      "fish",
+      "cereals containing gluten",
+      "egg"
+    ],
+    "allergen_notes": "Contains fish (salmon), wheat (bagel), and likely egg (mayonnaise). Milk-free, nut-free, soya-free, sesame-free, crustacean-free, mollusc-free.",
+    "diet_tags": [
+      "pescatarian",
+      "nut-free",
+      "milk-free"
+    ],
+    "meal_category": "sandwich/wrap",
+    "method_steps": [
+      "Cut the bagel in half, toast and leave to cool.",
+      "Drain the salmon and remove the bones. Mix with the mayonnaise and pepper. Tinned salmon bones are edible and contain calcium, but remove if your child doesn't like the texture.",
+      "Spread the mixture on one half of the bagel, add cucumber and lettuce, then top with the other half."
+    ],
+    "cultural_context": "British/Western lunchbox style",
+    "source_id": "src_001",
+    "source_url": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/school-packed-lunches/",
+    "source_licence": "Open Government Licence v3.0"
+  },
+  {
+    "id": "recipe_006",
+    "name": "Soft cheese and salad sandwich",
+    "source": "UK Government Lunchbox Recipe Booklet (NHS/PHE)",
+    "description": "A quick and easy sandwich to provide dairy in your child's lunchbox. Works well with an apple and a fruit teacake.",
+    "prep_time_mins": 10,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "ingredients": [
+      "2 thick slices of wholemeal bread",
+      "2 tablespoons medium-fat soft cheese",
+      "3cm piece of cucumber, finely chopped",
+      "20g celery (about two-thirds of a stick), finely chopped",
+      "small wedge of lettuce, to give 2 tablespoons when shredded",
+      "pinch of black pepper or paprika, optional"
+    ],
+    "extras_suggested": [
+      "an apple",
+      "fruit teacake",
+      "small bottle of water"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1120,
+      "energy_kcal": 266,
+      "fat_g": 5.9,
+      "saturates_g": 2.6,
+      "carbohydrate_g": 37.1,
+      "sugars_g": 4.2,
+      "fibre_g": 7.0,
+      "protein_g": 12.7,
+      "salt_g": 1.1
+    },
+    "allergens_present": [
+      "milk",
+      "cereals containing gluten",
+      "celery"
+    ],
+    "allergen_notes": "Contains wheat (bread), milk (soft cheese), and celery. Egg-free, nut-free, fish-free, soya-free.",
+    "diet_tags": [
+      "vegetarian",
+      "nut-free",
+      "egg-free",
+      "fish-free",
+      "lowest-fat option"
+    ],
+    "meal_category": "sandwich/wrap",
+    "method_steps": [
+      "Spread both slices of bread with the cheese (helps prevent a soggy sandwich).",
+      "Pat the salad dry and use to fill the sandwich, sprinkling with pepper or paprika if using."
+    ],
+    "cultural_context": "British/Western lunchbox style",
+    "source_id": "src_001",
+    "source_url": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/school-packed-lunches/",
+    "source_licence": "Open Government Licence v3.0"
+  },
+  {
+    "id": "recipe_007",
+    "name": "Spicy chicken and salad wrap",
+    "source": "UK Government Lunchbox Recipe Booklet (NHS/PHE)",
+    "description": "Wraps are a popular alternative to sandwiches. Complete with homemade popcorn and fresh fruit.",
+    "prep_time_mins": 10,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "ingredients": [
+      "1 tablespoon low-fat Greek style yoghurt",
+      "1/4 teaspoon curry powder, to taste",
+      "large pinch of chilli powder, to taste",
+      "85g cooked chicken breast, chopped into small pieces",
+      "1 large wholemeal wrap",
+      "small wedge of lettuce, to give 2 tablespoons when shredded",
+      "3 slices of cucumber, chopped",
+      "1 slice of pepper, chopped"
+    ],
+    "extras_suggested": [
+      "peach and strawberry slices",
+      "homemade popcorn (e.g. cinnamon flavour)",
+      "150ml fruit juice drink (no added sugar)"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1588,
+      "energy_kcal": 377,
+      "fat_g": 8.2,
+      "saturates_g": 3.2,
+      "carbohydrate_g": 37.9,
+      "sugars_g": 6.1,
+      "fibre_g": 6.5,
+      "protein_g": 34.7,
+      "salt_g": 1.2
+    },
+    "allergens_present": [
+      "milk",
+      "cereals containing gluten"
+    ],
+    "allergen_notes": "Contains wheat (wrap) and milk (yoghurt). Highest protein recipe in this set. Egg-free, nut-free, fish-free, soya-free.",
+    "diet_tags": [
+      "high-protein",
+      "nut-free",
+      "egg-free",
+      "fish-free"
+    ],
+    "meal_category": "sandwich/wrap",
+    "method_steps": [
+      "Mix the yoghurt and spices to taste and add the chicken (great way to use leftover roast chicken).",
+      "Spread the chicken mixture on the wrap, then sprinkle on lettuce, cucumber and pepper.",
+      "Fold opposite edges of the wrap, then roll up and cut in half."
+    ],
+    "cultural_context": "British/Western lunchbox style with curry-spiced filling",
+    "source_id": "src_001",
+    "source_url": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/school-packed-lunches/",
+    "source_licence": "Open Government Licence v3.0"
+  },
+  {
+    "id": "recipe_008",
+    "name": "Tuna and bean salad",
+    "source": "UK Government Lunchbox Recipe Booklet (NHS/PHE)",
+    "description": "A colourful salad, a good way to include fish in your child's lunchbox. Works well with malt loaf and a satsuma.",
+    "prep_time_mins": 10,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "ingredients": [
+      "3 teaspoons olive oil",
+      "juice of half a lemon",
+      "large pinch of dried mixed herbs",
+      "large pinch of mustard powder",
+      "large pinch of black pepper",
+      "1 slice of pepper, chopped",
+      "2 spring onions, sliced",
+      "3cm piece of cucumber, chopped",
+      "1 heaped tablespoon canned mixed beans in water, drained",
+      "half a 160g can of tuna in spring water, drained",
+      "1 thick slice of wholemeal bread and lower-fat spread"
+    ],
+    "extras_suggested": [
+      "a satsuma",
+      "slice of malt loaf",
+      "200ml semi-skimmed milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1362,
+      "energy_kcal": 325,
+      "fat_g": 14.4,
+      "saturates_g": 2.4,
+      "carbohydrate_g": 23.2,
+      "sugars_g": 3.3,
+      "fibre_g": 6.4,
+      "protein_g": 22.5,
+      "salt_g": 1.1
+    },
+    "allergens_present": [
+      "fish",
+      "cereals containing gluten",
+      "mustard"
+    ],
+    "allergen_notes": "Contains fish (tuna), wheat (bread), and mustard (mustard powder). Milk-free, egg-free, nut-free, soya-free, crustacean-free.",
+    "diet_tags": [
+      "pescatarian",
+      "nut-free",
+      "milk-free",
+      "egg-free"
+    ],
+    "meal_category": "salad",
+    "method_steps": [
+      "Mix the oil, lemon juice, mixed herbs, mustard powder and black pepper.",
+      "Add to the salad vegetables, beans and tuna and mix gently. (Double the recipe to use the rest of the tuna can.)",
+      "Serve with the bread and lower-fat spread. Can also be served with cold pasta instead of bread."
+    ],
+    "cultural_context": "British/Western lunchbox style",
+    "source_id": "src_001",
+    "source_url": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/school-packed-lunches/",
+    "source_licence": "Open Government Licence v3.0"
+  },
+  {
+    "id": "recipe_009",
+    "name": "Tuna mayonnaise and sweetcorn sandwich",
+    "source": "UK Government Lunchbox Recipe Booklet (NHS/PHE)",
+    "description": "Mild flavour of tinned tuna combined with sweetcorn. Works well with carrot/cucumber sticks and mixed berries.",
+    "prep_time_mins": 10,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "ingredients": [
+      "half a 160g can of tuna in spring water, drained",
+      "1 level tablespoon reduced-calorie mayonnaise",
+      "1 heaped tablespoon sweetcorn (tinned, or cooked from frozen)",
+      "large pinch of black pepper",
+      "2 thick slices of half-and-half bread"
+    ],
+    "extras_suggested": [
+      "1 small carrot and a 3cm chunk of cucumber, cut into sticks",
+      "60g mixed berries",
+      "200ml semi-skimmed milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1504,
+      "energy_kcal": 357,
+      "fat_g": 7.5,
+      "saturates_g": 1.3,
+      "carbohydrate_g": 44.3,
+      "sugars_g": 4.5,
+      "fibre_g": 6.2,
+      "protein_g": 25.0,
+      "salt_g": 1.4
+    },
+    "allergens_present": [
+      "fish",
+      "cereals containing gluten",
+      "egg"
+    ],
+    "allergen_notes": "Contains fish (tuna), wheat (bread), and likely egg (mayonnaise). Milk-free, nut-free, soya-free.",
+    "diet_tags": [
+      "pescatarian",
+      "nut-free",
+      "milk-free",
+      "lowest-saturated-fat option"
+    ],
+    "meal_category": "sandwich/wrap",
+    "method_steps": [
+      "Mix the tuna with the mayonnaise, sweetcorn and pepper. Can be made the night before.",
+      "Sandwich the mixture between the slices of bread."
+    ],
+    "cultural_context": "British/Western lunchbox style",
+    "source_id": "src_001",
+    "source_url": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/school-packed-lunches/",
+    "source_licence": "Open Government Licence v3.0"
+  },
+  {
+    "id": "recipe_010",
+    "name": "Traditional Peanut Butter and Jelly",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Traditional Peanut Butter and Jelly. In PACK-IT Cookbook (p. 4). Virginia Cooperative Extension.",
+    "description": "Peanut butter and jelly sandwich on whole-wheat bread with carrot sticks, apple slices, and low-fat milk. A classic budget-friendly lunchbox staple.",
+    "prep_time_mins": 5,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "lunch_cost_usd": 1.21,
+    "ingredients": [
+      "2 slices whole-wheat bread",
+      "2 tablespoons peanut butter (or allergy-friendly alternative)",
+      "1 tablespoon grape jelly"
+    ],
+    "extras_suggested": [
+      "10 baby carrots",
+      "1 medium apple, sliced",
+      "1 cup low-fat (1%) milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 2552,
+      "energy_kcal": 610,
+      "fat_g": 21.0,
+      "saturates_g": 5.0,
+      "carbohydrate_g": 89.0,
+      "sugars_g": 53.0,
+      "fibre_g": 12.0,
+      "protein_g": 23.0,
+      "salt_g": 1.4
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "peanut"
+    ],
+    "allergen_notes": "Contains wheat (bread) and peanuts (peanut butter). Use sunflower seed butter for peanut-free schools. Milk-free, egg-free as written.",
+    "diet_tags": [
+      "vegetarian",
+      "fish-free",
+      "egg-free",
+      "milk-free"
+    ],
+    "meal_category": "sandwich/wrap",
+    "cultural_context": "American school lunchbox classic"
+  },
+  {
+    "id": "recipe_011",
+    "name": "Homemade Chicken Noodle Soup",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Homemade Chicken Noodle Soup. In PACK-IT Cookbook (p. 5). Virginia Cooperative Extension. Adapted from Virginia Family Nutrition Program Chicken Noodle Soup.",
+    "description": "Savory homemade chicken noodle soup \u2014 great as a dinner and packed lunch the next day. Uses whole-wheat noodles and fresh vegetables.",
+    "prep_time_mins": 30,
+    "cook_time_mins": 150,
+    "serves": 6,
+    "lunch_cost_usd": 1.91,
+    "ingredients": [
+      "3-pound whole chicken (or 12 ounces canned white meat chicken, drained)",
+      "1 onion, diced",
+      "1 stalk of celery, diced",
+      "10 baby carrots, diced",
+      "8 ounces whole-wheat noodles",
+      "Salt and ground black pepper to taste"
+    ],
+    "extras_suggested": [
+      "5 whole-wheat crackers",
+      "1 orange",
+      "1 cup low-fat (1%) milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 2510,
+      "energy_kcal": 600,
+      "fat_g": 14.0,
+      "saturates_g": 4.0,
+      "carbohydrate_g": 73.0,
+      "sugars_g": 28.0,
+      "fibre_g": 9.0,
+      "protein_g": 48.0,
+      "salt_g": 0.9
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "celery"
+    ],
+    "allergen_notes": "Contains wheat (noodles) and celery. Milk-free, egg-free, fish-free, nut-free as written.",
+    "diet_tags": [
+      "high-protein",
+      "nut-free",
+      "egg-free",
+      "fish-free",
+      "milk-free"
+    ],
+    "meal_category": "soup/hot",
+    "cultural_context": "Classic American family meal / school lunchbox leftover"
+  },
+  {
+    "id": "recipe_012",
+    "name": "English Muffin Mini Pizza",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). English Muffin Mini Pizza. In PACK-IT Cookbook (p. 6). Virginia Cooperative Extension.",
+    "description": "Whole-wheat English muffin topped with pizza sauce, reduced-fat cheddar cheese, and diced green pepper. Fun, customisable kid favourite.",
+    "prep_time_mins": 5,
+    "cook_time_mins": 5,
+    "serves": 1,
+    "lunch_cost_usd": 2.05,
+    "ingredients": [
+      "1 whole-wheat English muffin",
+      "2 tablespoons pizza sauce",
+      "2 tablespoons reduced-fat cheddar cheese, shredded",
+      "1/4 green pepper, diced"
+    ],
+    "extras_suggested": [
+      "1/2 cup pineapple chunks",
+      "1 cup low-fat (1%) milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1423,
+      "energy_kcal": 340,
+      "fat_g": 7.0,
+      "saturates_g": 3.5,
+      "carbohydrate_g": 54.0,
+      "sugars_g": 28.0,
+      "fibre_g": 7.0,
+      "protein_g": 19.0,
+      "salt_g": 1.4
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "milk"
+    ],
+    "allergen_notes": "Contains wheat (muffin) and milk (cheese). Egg-free, fish-free, nut-free, soya-free.",
+    "diet_tags": [
+      "vegetarian",
+      "nut-free",
+      "egg-free",
+      "fish-free"
+    ],
+    "meal_category": "pizza/hot or cold",
+    "cultural_context": "American school lunchbox"
+  },
+  {
+    "id": "recipe_013",
+    "name": "Black Beans and Rice",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Black Beans and Rice. In PACK-IT Cookbook (p. 7). Virginia Cooperative Extension. Adapted from Virginia Family Nutrition Program Southwestern Beans and Rice.",
+    "description": "Hearty black beans with brown rice, canned tomatoes, green beans, onion, and green pepper. High-fibre, plant-based protein.",
+    "prep_time_mins": 15,
+    "cook_time_mins": 30,
+    "serves": 6,
+    "lunch_cost_usd": 1.6,
+    "ingredients": [
+      "15 ounces canned black beans, drained and rinsed",
+      "1 onion, diced",
+      "1 green pepper, diced",
+      "15 ounces canned low sodium diced tomatoes",
+      "1/8 teaspoon ground cumin",
+      "1/4 teaspoon minced garlic",
+      "1 cup brown rice",
+      "2-15 ounce cans no added salt green beans, trimmed"
+    ],
+    "extras_suggested": [
+      "1 plum",
+      "1 cup low-fat (1%) milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1549,
+      "energy_kcal": 370,
+      "fat_g": 4.5,
+      "saturates_g": 2.0,
+      "carbohydrate_g": 67.0,
+      "sugars_g": 24.0,
+      "fibre_g": 12.0,
+      "protein_g": 18.0,
+      "salt_g": 0.6
+    },
+    "allergens_present": [],
+    "allergen_notes": "Free from all 14 major allergens as written. Suitable for most restrictions.",
+    "diet_tags": [
+      "vegan-friendly",
+      "vegetarian",
+      "nut-free",
+      "egg-free",
+      "fish-free",
+      "milk-free",
+      "gluten-free"
+    ],
+    "meal_category": "salad/grain bowl",
+    "cultural_context": "Southwestern American / family meal leftover"
+  },
+  {
+    "id": "recipe_014",
+    "name": "Simply Baked Chicken Drumstick with Mashed Potatoes",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Simply Baked Chicken Drumstick. In PACK-IT Cookbook (p. 8). Virginia Cooperative Extension.",
+    "description": "Baked chicken drumsticks with mashed potatoes made with low-fat milk and butter, served with canned green peas. Simple, high-protein leftover-friendly meal.",
+    "prep_time_mins": 30,
+    "cook_time_mins": 60,
+    "serves": 6,
+    "lunch_cost_usd": 3.06,
+    "ingredients": [
+      "8-12 chicken drumsticks (about 2 pounds)",
+      "1 tablespoon olive oil",
+      "6 white potatoes, cubed",
+      "1/4 cup low-fat milk",
+      "1 tablespoon butter",
+      "1 teaspoon ground black pepper",
+      "2-15 ounce cans no salt added green peas"
+    ],
+    "extras_suggested": [
+      "1 medium peach",
+      "1 cup low-fat (1%) milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 2386,
+      "energy_kcal": 570,
+      "fat_g": 14.0,
+      "saturates_g": 5.0,
+      "carbohydrate_g": 68.0,
+      "sugars_g": 32.0,
+      "fibre_g": 9.0,
+      "protein_g": 45.0,
+      "salt_g": 0.7
+    },
+    "allergens_present": [
+      "milk"
+    ],
+    "allergen_notes": "Contains milk (mashed potato uses milk and butter). Egg-free, fish-free, nut-free, gluten-free.",
+    "diet_tags": [
+      "high-protein",
+      "gluten-free",
+      "nut-free",
+      "egg-free",
+      "fish-free"
+    ],
+    "meal_category": "hot main / leftover",
+    "cultural_context": "American family dinner / school lunchbox"
+  },
+  {
+    "id": "recipe_015",
+    "name": "Turkey Burrito",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Turkey Burrito. In PACK-IT Cookbook (p. 10). Virginia Cooperative Extension.",
+    "description": "Ground turkey with black beans, corn, and salsa wrapped in a whole-wheat tortilla with romaine lettuce and low-fat cheese.",
+    "prep_time_mins": 20,
+    "cook_time_mins": 0,
+    "serves": 8,
+    "lunch_cost_usd": 1.89,
+    "ingredients": [
+      "8 whole-wheat tortillas",
+      "1 pound 93% lean ground turkey",
+      "15 ounces canned black beans, drained and rinsed",
+      "15 ounces canned no salt added corn, drained",
+      "1/2 cup salsa",
+      "1 bunch romaine lettuce, shredded",
+      "1 cup shredded low-fat cheese"
+    ],
+    "extras_suggested": [
+      "1/2 cup honeydew melon"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1549,
+      "energy_kcal": 370,
+      "fat_g": 13.0,
+      "saturates_g": 5.0,
+      "carbohydrate_g": 45.0,
+      "sugars_g": 10.0,
+      "fibre_g": 9.0,
+      "protein_g": 23.0,
+      "salt_g": 1.3
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "milk"
+    ],
+    "allergen_notes": "Contains wheat (tortillas) and milk (cheese). Egg-free, nut-free, fish-free.",
+    "diet_tags": [
+      "high-protein",
+      "nut-free",
+      "egg-free",
+      "fish-free"
+    ],
+    "meal_category": "sandwich/wrap",
+    "cultural_context": "Mexican-American / school lunchbox"
+  },
+  {
+    "id": "recipe_016",
+    "name": "French Toast with Carrots and Almonds",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). French Toast. In PACK-IT Cookbook (p. 11). Virginia Cooperative Extension. Adapted from Virginia Family Nutrition Program French Toast with Fruit Sauce.",
+    "description": "Cinnamon-vanilla whole-wheat French toast, made with eggs and low-fat milk. Packed with baby carrots and unsalted almonds.",
+    "prep_time_mins": 10,
+    "cook_time_mins": 15,
+    "serves": 8,
+    "lunch_cost_usd": 1.52,
+    "ingredients": [
+      "4 large eggs",
+      "1 cup low-fat (1%) milk",
+      "1/2 teaspoon ground cinnamon",
+      "1/2 teaspoon vanilla",
+      "16 slices whole-wheat bread",
+      "1 tablespoon olive oil"
+    ],
+    "extras_suggested": [
+      "10 baby carrots",
+      "1/4 cup unsalted almonds",
+      "1 banana"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 2301,
+      "energy_kcal": 550,
+      "fat_g": 25.0,
+      "saturates_g": 3.0,
+      "carbohydrate_g": 70.0,
+      "sugars_g": 27.0,
+      "fibre_g": 14.0,
+      "protein_g": 20.0,
+      "salt_g": 1.0
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "egg",
+      "milk",
+      "nuts"
+    ],
+    "allergen_notes": "Contains wheat (bread), egg, milk, and nuts (almonds in pack-with). Highly allergenic \u2014 check all restrictions.",
+    "diet_tags": [
+      "vegetarian",
+      "fish-free"
+    ],
+    "meal_category": "breakfast-for-lunch",
+    "cultural_context": "American breakfast / school lunchbox"
+  },
+  {
+    "id": "recipe_017",
+    "name": "Pulled Pork Barbeque with Cornbread",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Pulled Pork Barbeque. In PACK-IT Cookbook (p. 12). Virginia Cooperative Extension. Adapted from Virginia Family Nutrition Program Barbeque Pork Chops.",
+    "description": "Slow-cooker pulled pork shoulder with vinegar, Worcestershire, and spices, served with cornbread and lima beans.",
+    "prep_time_mins": 15,
+    "cook_time_mins": 300,
+    "serves": 6,
+    "lunch_cost_usd": 2.37,
+    "ingredients": [
+      "3 pounds pork shoulder roast, visible fat removed",
+      "1/2 cup water",
+      "1 tablespoon vinegar",
+      "1 tablespoon Worcestershire sauce",
+      "1 teaspoon paprika",
+      "1/2 teaspoon chili powder",
+      "1/4 teaspoon black pepper",
+      "2-15 ounce cans no salt added lima beans, drained",
+      "6 small squares premade cornbread"
+    ],
+    "extras_suggested": [
+      "1/2 cup watermelon chunks",
+      "1 cup low-fat (1%) milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 2594,
+      "energy_kcal": 620,
+      "fat_g": 19.0,
+      "saturates_g": 7.0,
+      "carbohydrate_g": 52.0,
+      "sugars_g": 20.0,
+      "fibre_g": 6.0,
+      "protein_g": 59.0,
+      "salt_g": 1.3
+    },
+    "allergens_present": [
+      "cereals containing gluten"
+    ],
+    "allergen_notes": "Contains gluten (cornbread). Milk-free, egg-free, fish-free, nut-free as written. Check cornbread brand for additional allergens.",
+    "diet_tags": [
+      "high-protein",
+      "nut-free",
+      "egg-free",
+      "fish-free",
+      "milk-free"
+    ],
+    "meal_category": "hot main / leftover",
+    "cultural_context": "American Southern BBQ / family meal"
+  },
+  {
+    "id": "recipe_018",
+    "name": "Whole-Wheat Pita Pocket with Hummus",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Whole-Wheat Pita Pocket. In PACK-IT Cookbook (p. 13). Virginia Cooperative Extension.",
+    "description": "Whole-wheat pita filled with hummus and green pepper strips. Quick, flexible, kid-friendly with endless filling variations.",
+    "prep_time_mins": 5,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "lunch_cost_usd": 2.17,
+    "ingredients": [
+      "1 whole-wheat pita",
+      "1/4 cup hummus",
+      "1/4 cup green pepper strips"
+    ],
+    "extras_suggested": [
+      "1/2 cup watermelon chunks",
+      "1 cup low-fat (1%) milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1716,
+      "energy_kcal": 410,
+      "fat_g": 9.0,
+      "saturates_g": 2.5,
+      "carbohydrate_g": 68.0,
+      "sugars_g": 20.0,
+      "fibre_g": 7.0,
+      "protein_g": 18.0,
+      "salt_g": 1.5
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "sesame"
+    ],
+    "allergen_notes": "Contains wheat (pita) and sesame (hummus contains tahini). Milk-free, egg-free, fish-free, nut-free.",
+    "diet_tags": [
+      "vegan-friendly",
+      "vegetarian",
+      "nut-free",
+      "egg-free",
+      "fish-free",
+      "milk-free"
+    ],
+    "meal_category": "sandwich/wrap",
+    "cultural_context": "Middle Eastern-inspired / American school lunchbox"
+  },
+  {
+    "id": "recipe_019",
+    "name": "Creamy Chicken Salad with Crackers",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Creamy Chicken Salad. In PACK-IT Cookbook (p. 14). Virginia Cooperative Extension. Adapted from Virginia Family Nutrition Program Chicken Salad.",
+    "description": "Diced chicken breast with red onion, celery, and light mayo. Served with whole-grain crackers and grapes for dipping fun.",
+    "prep_time_mins": 15,
+    "cook_time_mins": 0,
+    "serves": 6,
+    "lunch_cost_usd": 1.31,
+    "ingredients": [
+      "2-2.5 cups boneless skinless chicken breast, cooked and diced (or 12 ounces canned white meat chicken, drained)",
+      "1/2 red onion, finely diced",
+      "1 stalk celery, finely diced",
+      "1/4 cup light mayonnaise",
+      "10 whole-wheat crackers"
+    ],
+    "extras_suggested": [
+      "1/2 cup grapes, halved",
+      "1 cup low-fat (1%) milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1716,
+      "energy_kcal": 410,
+      "fat_g": 13.0,
+      "saturates_g": 3.5,
+      "carbohydrate_g": 47.0,
+      "sugars_g": 26.0,
+      "fibre_g": 4.0,
+      "protein_g": 28.0,
+      "salt_g": 1.1
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "egg",
+      "celery"
+    ],
+    "allergen_notes": "Contains wheat (crackers), egg (mayonnaise), and celery. Milk-free, fish-free, nut-free.",
+    "diet_tags": [
+      "high-protein",
+      "nut-free",
+      "fish-free",
+      "milk-free"
+    ],
+    "meal_category": "salad",
+    "cultural_context": "American school lunchbox"
+  },
+  {
+    "id": "recipe_020",
+    "name": "Chef Salad with Italian Dressing",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Chef Salad. In PACK-IT Cookbook (p. 16). Virginia Cooperative Extension. Adapted from Virginia Family Nutrition Program Homemade Italian Dressing.",
+    "description": "Romaine lettuce with diced low-sodium deli turkey and/or ham, reduced-fat cheddar, cherry tomatoes, and homemade Italian dressing.",
+    "prep_time_mins": 5,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "lunch_cost_usd": 2.1,
+    "ingredients": [
+      "1-2 cups romaine lettuce, shredded",
+      "1.5 ounces low sodium deli turkey and/or ham, diced",
+      "1 tablespoon reduced-fat cheddar cheese, shredded",
+      "1/2 cup cherry tomatoes, halved",
+      "2 tablespoons homemade Italian dressing (water, vinegar, olive oil, Parmesan, Italian seasoning, garlic powder, celery salt, black pepper)"
+    ],
+    "extras_suggested": [
+      "1/4 cup raisins",
+      "5 whole-wheat crackers"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1506,
+      "energy_kcal": 360,
+      "fat_g": 10.0,
+      "saturates_g": 2.0,
+      "carbohydrate_g": 54.0,
+      "sugars_g": 29.0,
+      "fibre_g": 8.0,
+      "protein_g": 17.0,
+      "salt_g": 1.5
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "milk",
+      "celery"
+    ],
+    "allergen_notes": "Contains wheat (crackers, dressing), milk (cheese, Parmesan), celery (celery salt in dressing). Egg-free, nut-free, fish-free.",
+    "diet_tags": [
+      "nut-free",
+      "egg-free",
+      "fish-free"
+    ],
+    "meal_category": "salad",
+    "cultural_context": "American school lunchbox"
+  },
+  {
+    "id": "recipe_021",
+    "name": "Brown Rice Bowl with Cucumber, Hummus and Avocado",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Brown Rice with Cucumber, Hummus, and Avocado. In PACK-IT Cookbook (p. 17). Virginia Cooperative Extension.",
+    "description": "Layered brown rice with diced cucumber, hummus, and optional avocado. Hearty plant-based lunch served hot or cold.",
+    "prep_time_mins": 5,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "lunch_cost_usd": 2.55,
+    "ingredients": [
+      "1 cup brown rice, cooked",
+      "1/2 cucumber, diced",
+      "1/4 cup hummus",
+      "1/2 avocado, diced (optional, add lemon juice to prevent browning)"
+    ],
+    "extras_suggested": [
+      "1 cup low-fat (1%) milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 2343,
+      "energy_kcal": 560,
+      "fat_g": 20.0,
+      "saturates_g": 4.0,
+      "carbohydrate_g": 82.0,
+      "sugars_g": 16.0,
+      "fibre_g": 11.0,
+      "protein_g": 18.0,
+      "salt_g": 0.7
+    },
+    "allergens_present": [
+      "sesame"
+    ],
+    "allergen_notes": "Contains sesame (hummus/tahini). Milk-free, egg-free, fish-free, nut-free, gluten-free.",
+    "diet_tags": [
+      "vegan-friendly",
+      "vegetarian",
+      "nut-free",
+      "egg-free",
+      "fish-free",
+      "milk-free",
+      "gluten-free"
+    ],
+    "meal_category": "salad/grain bowl",
+    "cultural_context": "Middle Eastern-inspired / American school lunchbox"
+  },
+  {
+    "id": "recipe_022",
+    "name": "Turkey and Cheese Tortilla Roll-Up",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Tortilla Roll-up. In PACK-IT Cookbook (p. 18). Virginia Cooperative Extension.",
+    "description": "Whole-wheat tortilla with deli turkey, reduced-fat cheddar, and shredded romaine lettuce. Quick 5-minute kid-friendly roll-up.",
+    "prep_time_mins": 5,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "lunch_cost_usd": 2.15,
+    "ingredients": [
+      "1 whole-wheat tortilla",
+      "1 ounce low sodium deli turkey or ham",
+      "1 tablespoon reduced-fat cheddar cheese, shredded",
+      "1/2 cup romaine lettuce, shredded"
+    ],
+    "extras_suggested": [
+      "6 ounces low-fat vanilla yogurt",
+      "1 apple"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1674,
+      "energy_kcal": 400,
+      "fat_g": 9.0,
+      "saturates_g": 4.5,
+      "carbohydrate_g": 67.0,
+      "sugars_g": 44.0,
+      "fibre_g": 8.0,
+      "protein_g": 20.0,
+      "salt_g": 1.4
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "milk"
+    ],
+    "allergen_notes": "Contains wheat (tortilla) and milk (cheese). Egg-free, nut-free, fish-free.",
+    "diet_tags": [
+      "nut-free",
+      "egg-free",
+      "fish-free"
+    ],
+    "meal_category": "sandwich/wrap",
+    "cultural_context": "American school lunchbox"
+  },
+  {
+    "id": "recipe_023",
+    "name": "Eggs and Things Snack Box",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Eggs and Things. In PACK-IT Cookbook (p. 19). Virginia Cooperative Extension.",
+    "description": "Hard-boiled eggs with pretzels, grapes, hummus, and baby carrots \u2014 a bento-style balanced lunchbox from every food group.",
+    "prep_time_mins": 15,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "lunch_cost_usd": 1.78,
+    "ingredients": [
+      "2 hard-boiled eggs",
+      "1/4 cup unsalted pretzels",
+      "1/2 cup grapes",
+      "1/4 cup hummus",
+      "10 baby carrots"
+    ],
+    "extras_suggested": [],
+    "nutrition_per_serving": {
+      "energy_kj": 1674,
+      "energy_kcal": 400,
+      "fat_g": 9.0,
+      "saturates_g": 4.5,
+      "carbohydrate_g": 67.0,
+      "sugars_g": 44.0,
+      "fibre_g": 8.0,
+      "protein_g": 20.0,
+      "salt_g": 1.4
+    },
+    "allergens_present": [
+      "egg",
+      "cereals containing gluten",
+      "sesame"
+    ],
+    "allergen_notes": "Contains egg (hard-boiled eggs), wheat (pretzels), sesame (hummus/tahini). Milk-free, fish-free, nut-free.",
+    "diet_tags": [
+      "vegetarian",
+      "nut-free",
+      "fish-free",
+      "milk-free"
+    ],
+    "meal_category": "snack-box/bento",
+    "cultural_context": "American school lunchbox"
+  },
+  {
+    "id": "recipe_024",
+    "name": "Sweet Potato Bake with Corn and Cranberries",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Sweet Potato Bake. In PACK-IT Cookbook (p. 20). Virginia Cooperative Extension.",
+    "description": "Baked sweet potato topped with canned corn, dried cranberries, and light sour cream. Packed with fibre, vitamin A, and potassium.",
+    "prep_time_mins": 10,
+    "cook_time_mins": 45,
+    "serves": 1,
+    "lunch_cost_usd": 1.18,
+    "ingredients": [
+      "1 sweet potato",
+      "2 tablespoons canned no salt added corn",
+      "1 tablespoon dried cranberries",
+      "1 tablespoon light sour cream"
+    ],
+    "extras_suggested": [
+      "1 cup low sodium low-fat popcorn"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 795,
+      "energy_kcal": 190,
+      "fat_g": 2.0,
+      "saturates_g": 1.0,
+      "carbohydrate_g": 41.0,
+      "sugars_g": 14.0,
+      "fibre_g": 6.0,
+      "protein_g": 4.0,
+      "salt_g": 0.1
+    },
+    "allergens_present": [
+      "milk"
+    ],
+    "allergen_notes": "Contains milk (sour cream). Egg-free, fish-free, nut-free, gluten-free.",
+    "diet_tags": [
+      "vegetarian",
+      "gluten-free",
+      "nut-free",
+      "egg-free",
+      "fish-free",
+      "lowest-calorie"
+    ],
+    "meal_category": "hot main / leftover",
+    "cultural_context": "American school lunchbox"
+  },
+  {
+    "id": "recipe_025",
+    "name": "Spaghetti and Broccoli with Ground Beef",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Spaghetti and Broccoli. In PACK-IT Cookbook (p. 22). Virginia Cooperative Extension. Adapted from Virginia Family Nutrition Program Tomato Beef and Noodle Dinner.",
+    "description": "Whole-wheat spaghetti with lean ground beef, canned low-sodium tomatoes, and fresh broccoli. High-fibre, high-protein leftover-friendly meal.",
+    "prep_time_mins": 15,
+    "cook_time_mins": 60,
+    "serves": 6,
+    "lunch_cost_usd": 2.76,
+    "ingredients": [
+      "8 ounces whole-wheat spaghetti noodles",
+      "1 pound 90% lean ground beef",
+      "48 ounces canned low sodium diced tomatoes",
+      "2 stalks broccoli (about 1 pound), chopped"
+    ],
+    "extras_suggested": [
+      "1 pear",
+      "1 cup low-fat (1%) milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 2301,
+      "energy_kcal": 550,
+      "fat_g": 12.0,
+      "saturates_g": 5.0,
+      "carbohydrate_g": 78.0,
+      "sugars_g": 37.0,
+      "fibre_g": 15.0,
+      "protein_g": 40.0,
+      "salt_g": 0.6
+    },
+    "allergens_present": [
+      "cereals containing gluten"
+    ],
+    "allergen_notes": "Contains wheat (spaghetti). Milk-free, egg-free, nut-free, fish-free.",
+    "diet_tags": [
+      "high-protein",
+      "nut-free",
+      "egg-free",
+      "fish-free",
+      "milk-free"
+    ],
+    "meal_category": "hot main / leftover",
+    "cultural_context": "American family dinner / school lunchbox"
+  },
+  {
+    "id": "recipe_026",
+    "name": "Yogurt Parfait with Granola and Strawberries",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Yogurt Parfait. In PACK-IT Cookbook (p. 23). Virginia Cooperative Extension.",
+    "description": "Low-fat vanilla yogurt layered with fresh strawberries and low-fat granola. Paired with sugar snap peas for a balanced lunch.",
+    "prep_time_mins": 5,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "lunch_cost_usd": 1.35,
+    "ingredients": [
+      "6 ounces low-fat vanilla yogurt",
+      "1/2 cup strawberries, capped and sliced",
+      "2 tablespoons low-fat granola"
+    ],
+    "extras_suggested": [
+      "1/2 cup sugar snap peas"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1004,
+      "energy_kcal": 240,
+      "fat_g": 6.0,
+      "saturates_g": 2.0,
+      "carbohydrate_g": 37.0,
+      "sugars_g": 30.0,
+      "fibre_g": 3.0,
+      "protein_g": 11.0,
+      "salt_g": 0.3
+    },
+    "allergens_present": [
+      "milk",
+      "cereals containing gluten"
+    ],
+    "allergen_notes": "Contains milk (yogurt) and cereals/oats (granola). Check granola brand for nuts. Egg-free, fish-free.",
+    "diet_tags": [
+      "vegetarian",
+      "egg-free",
+      "fish-free"
+    ],
+    "meal_category": "snack-box/bento",
+    "cultural_context": "American school lunchbox"
+  },
+  {
+    "id": "recipe_027",
+    "name": "Chicken Lo Mein",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Chicken Lo Mein. In PACK-IT Cookbook (p. 24). Virginia Cooperative Extension. Adapted from Virginia Family Nutrition Program Chicken Stir-fry.",
+    "description": "Asian-style chicken stir-fry with whole-wheat noodles, carrots, zucchini, green pepper, celery, onion, and reduced-sodium soy sauce.",
+    "prep_time_mins": 20,
+    "cook_time_mins": 10,
+    "serves": 6,
+    "lunch_cost_usd": 1.7,
+    "ingredients": [
+      "8 ounces whole-wheat spaghetti noodles",
+      "4 ounces boneless skinless chicken breast, sliced into thin strips",
+      "1 teaspoon vegetable oil",
+      "3 carrots, chopped",
+      "2 zucchinis, chopped",
+      "1 green pepper, chopped",
+      "1 celery stalk, chopped",
+      "1/2 onion, chopped",
+      "1 tablespoon reduced sodium soy sauce"
+    ],
+    "extras_suggested": [
+      "1 orange, sliced",
+      "1 cup low-fat (1%) milk"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 2301,
+      "energy_kcal": 550,
+      "fat_g": 12.0,
+      "saturates_g": 5.0,
+      "carbohydrate_g": 78.0,
+      "sugars_g": 37.0,
+      "fibre_g": 15.0,
+      "protein_g": 40.0,
+      "salt_g": 0.6
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "soybeans",
+      "celery"
+    ],
+    "allergen_notes": "Contains wheat (noodles), soy (soy sauce), and celery. Milk-free, egg-free, fish-free, nut-free.",
+    "diet_tags": [
+      "high-protein",
+      "nut-free",
+      "egg-free",
+      "fish-free",
+      "milk-free"
+    ],
+    "meal_category": "hot main / leftover",
+    "cultural_context": "Asian-American / school lunchbox"
+  },
+  {
+    "id": "recipe_028",
+    "name": "Grilled Cheese Sandwich with Tomato Soup",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Grilled Cheese Sandwich. In PACK-IT Cookbook (p. 25). Virginia Cooperative Extension.",
+    "description": "Classic grilled cheddar cheese sandwich on whole-wheat bread with low-sodium canned tomato soup. Paired with diced cantaloupe.",
+    "prep_time_mins": 5,
+    "cook_time_mins": 10,
+    "serves": 1,
+    "lunch_cost_usd": 2.17,
+    "ingredients": [
+      "2 slices whole-wheat bread",
+      "1 ounce sliced cheddar cheese",
+      "1 teaspoon olive oil",
+      "15 ounces low-sodium canned tomato soup"
+    ],
+    "extras_suggested": [
+      "1/2 cup cantaloupe, diced"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1004,
+      "energy_kcal": 240,
+      "fat_g": 6.0,
+      "saturates_g": 2.0,
+      "carbohydrate_g": 37.0,
+      "sugars_g": 30.0,
+      "fibre_g": 3.0,
+      "protein_g": 11.0,
+      "salt_g": 0.3
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "milk"
+    ],
+    "allergen_notes": "Contains wheat (bread) and milk (cheese). Egg-free, nut-free, fish-free. Tomato soup may contain celery; check label.",
+    "diet_tags": [
+      "vegetarian",
+      "nut-free",
+      "egg-free",
+      "fish-free"
+    ],
+    "meal_category": "sandwich/wrap",
+    "cultural_context": "American school lunchbox classic"
+  },
+  {
+    "id": "recipe_029",
+    "name": "Whole-Grain Cereal and Milk",
+    "source": "PACK-IT Cookbook, Virginia Cooperative Extension (Farris, A., Virginia Tech)",
+    "source_id": "src_002",
+    "source_url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+    "source_licence": "Public Domain (USDA SNAP-Ed funded)",
+    "citation": "Farris, A. (n.d.). Cereal and Milk. In PACK-IT Cookbook (p. 26). Virginia Cooperative Extension.",
+    "description": "Whole-grain low-sugar cereal with low-fat milk and banana. A quick, budget-friendly breakfast-for-lunch option. Pack each ingredient separately.",
+    "prep_time_mins": 5,
+    "cook_time_mins": 0,
+    "serves": 1,
+    "lunch_cost_usd": 1.05,
+    "ingredients": [
+      "1 cup whole-grain cereal (low sugar, max 7g sugar per serving)",
+      "1 cup low-fat (1%) milk",
+      "1 banana"
+    ],
+    "extras_suggested": [
+      "1 celery stalk, cut into strips",
+      "1 ounce unsalted cashews"
+    ],
+    "nutrition_per_serving": {
+      "energy_kj": 1004,
+      "energy_kcal": 240,
+      "fat_g": 6.0,
+      "saturates_g": 2.0,
+      "carbohydrate_g": 37.0,
+      "sugars_g": 30.0,
+      "fibre_g": 3.0,
+      "protein_g": 11.0,
+      "salt_g": 0.3
+    },
+    "allergens_present": [
+      "cereals containing gluten",
+      "milk",
+      "nuts"
+    ],
+    "allergen_notes": "Contains cereals/gluten (cereal), milk, and nuts (cashews in pack-with). Egg-free, fish-free.",
+    "diet_tags": [
+      "vegetarian",
+      "egg-free",
+      "fish-free",
+      "lowest-cost"
+    ],
+    "meal_category": "breakfast-for-lunch",
+    "cultural_context": "American school lunchbox"
+  }
+]

@@ -1,0 +1,70 @@
+{
+  "sources": [
+    {
+      "source_id": "src_001",
+      "name": "UK Government Lunchbox Recipes",
+      "description": "9 school lunchbox recipes with full macronutrient profiles and EU FIC allergen tags, developed for UK primary school packed lunches.",
+      "publisher": "Public Health England / NHS",
+      "url": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/school-packed-lunches/",
+      "licence": "Open Government Licence v3.0",
+      "access_conditions": "Freely accessible. Attribution required.",
+      "contents": "9 recipes: allergen tags, full nutrition per serving (kcal, fat, saturates, carbohydrate, sugars, fibre, protein, salt), diet tags, preparation methods.",
+      "recipe_ids": ["recipe_001","recipe_002","recipe_003","recipe_004","recipe_005","recipe_006","recipe_007","recipe_008","recipe_009"]
+    },
+    {
+      "source_id": "src_002",
+      "name": "PACK-IT Cookbook: PAcking Complete Lunches for KIds Together",
+      "description": "20 recipes for school packed lunches designed to meet MyPlate standards. Developed by Virginia Cooperative Extension, funded by USDA SNAP-Ed.",
+      "publisher": "Virginia Cooperative Extension / Virginia Tech / Virginia State University",
+      "author": "Alisha Farris, PhD, RDN",
+      "url": "https://ext.vt.edu/food-nutrition/food-preparation-storage/pack-it-cookbook.html",
+      "pdf_filename": "Pack-It-Cook-book-Bag-Lunch-TBP-v4.pdf",
+      "licence": "Public Domain (US Government / USDA SNAP-Ed funded). Free to reproduce with attribution.",
+      "access_conditions": "Freely accessible. The U.S. Department of Agriculture (USDA) is an equal opportunity provider and employer.",
+      "citation": "Farris, A. (n.d.). PACK-IT Cookbook. Virginia Cooperative Extension. Virginia Tech and Virginia State University.",
+      "contents": "20 recipes across 4 weeks: full ingredient lists, nutrition facts panels (calories, fat, sodium, carbohydrates, protein, calcium, iron, potassium), lunch cost per serving, preparation time, food safety guidance.",
+      "recipe_ids": ["recipe_010","recipe_011","recipe_012","recipe_013","recipe_014","recipe_015","recipe_016","recipe_017","recipe_018","recipe_019","recipe_020","recipe_021","recipe_022","recipe_023","recipe_024","recipe_025","recipe_026","recipe_027","recipe_028","recipe_029"]
+    },
+    {
+      "source_id": "src_003",
+      "name": "75 Healthy Lunch Ideas for Kids",
+      "description": "Meal combination ideas referencing healthy lunchbox components. Note: specific recipes reference the proprietary FIXATE Cooking Show (Beachbody) and are not reproduced; only the general meal structure and ingredient categories are used.",
+      "publisher": "Autumn Calabrese / Beachbody",
+      "pdf_filename": "75LunchIdeasforKids_Recipe_Book_BOD_022819.pdf",
+      "licence": "Proprietary — individual meal components (fruits, vegetables, proteins, grains) referenced by ingredient category only, not verbatim recipe reproduction.",
+      "access_conditions": "Proprietary content. Used here only for general healthy lunchbox meal category guidance, not for verbatim recipe reproduction.",
+      "contents": "75 meal combination ideas across 10 categories: sandwiches, pastas, pizzas, breakfast, eggs, soups, wraps, salads, miscellaneous, recipes.",
+      "recipe_ids": []
+    },
+    {
+      "source_id": "src_004",
+      "name": "EU FIC / UK Food Information Regulations — 14 Declarable Allergens",
+      "description": "Legal reference for the 14 allergens requiring mandatory declaration under EU Regulation 1169/2011 (retained in UK law post-Brexit as the Food Information Regulations 2014).",
+      "publisher": "Food Standards Agency (FSA)",
+      "url": "https://www.food.gov.uk/business-guidance/allergen-guidance-for-food-businesses",
+      "licence": "Open Government Licence v3.0",
+      "access_conditions": "Freely accessible.",
+      "contents": "14 allergen definitions, school/caterer duty-of-care obligations, key facts on allergen prevalence in children."
+    },
+    {
+      "source_id": "src_005",
+      "name": "Government Dietary Recommendations — Energy and Nutrients for Children",
+      "description": "Age-banded dietary reference values for children aged 4–18, used to set per-lunch sugar/salt/energy ceilings in guardrails.py.",
+      "publisher": "Public Health England (now UKHSA)",
+      "url": "https://www.gov.uk/government/publications/government-dietary-recommendations",
+      "licence": "Open Government Licence v3.0",
+      "access_conditions": "Freely accessible.",
+      "contents": "EAR/RNI/LRNI values for energy, macronutrients, vitamins, minerals by sex and age band (4-6, 7-10, 11-14, 15-18 years)."
+    },
+    {
+      "source_id": "src_006",
+      "name": "The Eatwell Guide",
+      "description": "UK Government healthy eating guidelines used to structure lunchbox nutritional rationale in the generation layer.",
+      "publisher": "Public Health England",
+      "url": "https://www.gov.uk/government/publications/the-eatwell-guide",
+      "licence": "Open Government Licence v3.0",
+      "access_conditions": "Freely accessible.",
+      "contents": "Food group proportions, portion guidance, practical lunchbox application tips for each food group."
+    }
+  ]
+}

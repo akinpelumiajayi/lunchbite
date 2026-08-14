@@ -1,0 +1,125 @@
+{
+  "k": 5,
+  "n_allergens": 14,
+  "slots": 70,
+  "rows": [
+    {
+      "allergen": "cereals containing gluten",
+      "safe_recipes_in_corpus": 4,
+      "bm25": 5,
+      "dense": 5,
+      "rrf": 5,
+      "rerank": 5
+    },
+    {
+      "allergen": "crustaceans",
+      "safe_recipes_in_corpus": 29,
+      "bm25": 0,
+      "dense": 0,
+      "rrf": 0,
+      "rerank": 0
+    },
+    {
+      "allergen": "egg",
+      "safe_recipes_in_corpus": 23,
+      "bm25": 1,
+      "dense": 3,
+      "rrf": 2,
+      "rerank": 2
+    },
+    {
+      "allergen": "fish",
+      "safe_recipes_in_corpus": 26,
+      "bm25": 2,
+      "dense": 3,
+      "rrf": 2,
+      "rerank": 2
+    },
+    {
+      "allergen": "peanut",
+      "safe_recipes_in_corpus": 28,
+      "bm25": 1,
+      "dense": 1,
+      "rrf": 1,
+      "rerank": 1
+    },
+    {
+      "allergen": "soybeans",
+      "safe_recipes_in_corpus": 28,
+      "bm25": 0,
+      "dense": 0,
+      "rrf": 0,
+      "rerank": 0
+    },
+    {
+      "allergen": "milk",
+      "safe_recipes_in_corpus": 15,
+      "bm25": 5,
+      "dense": 3,
+      "rrf": 3,
+      "rerank": 3
+    },
+    {
+      "allergen": "nuts",
+      "safe_recipes_in_corpus": 27,
+      "bm25": 1,
+      "dense": 2,
+      "rrf": 1,
+      "rerank": 1
+    },
+    {
+      "allergen": "celery",
+      "safe_recipes_in_corpus": 23,
+      "bm25": 4,
+      "dense": 2,
+      "rrf": 3,
+      "rerank": 4
+    },
+    {
+      "allergen": "mustard",
+      "safe_recipes_in_corpus": 28,
+      "bm25": 1,
+      "dense": 0,
+      "rrf": 1,
+      "rerank": 1
+    },
+    {
+      "allergen": "sesame",
+      "safe_recipes_in_corpus": 25,
+      "bm25": 0,
+      "dense": 3,
+      "rrf": 1,
+      "rerank": 2
+    },
+    {
+      "allergen": "sulphites",
+      "safe_recipes_in_corpus": 29,
+      "bm25": 0,
+      "dense": 0,
+      "rrf": 0,
+      "rerank": 0
+    },
+    {
+      "allergen": "lupin",
+      "safe_recipes_in_corpus": 29,
+      "bm25": 0,
+      "dense": 0,
+      "rrf": 0,
+      "rerank": 0
+    },
+    {
+      "allergen": "molluscs",
+      "safe_recipes_in_corpus": 29,
+      "bm25": 0,
+      "dense": 0,
+      "rrf": 0,
+      "rerank": 0
+    }
+  ],
+  "totals": {
+    "bm25": 20,
+    "dense": 22,
+    "rrf": 19,
+    "rerank": 21
+  }
+}

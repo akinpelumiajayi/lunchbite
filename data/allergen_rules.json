@@ -1,0 +1,109 @@
+{
+  "source": "Q&A on EU Food Information for Consumers Regulation allergen provisions (FSA)",
+  "regulation": "EU FIC No.1169/2011 and Food Information Regulations 2014 (FIR)",
+  "the_14_allergens": [
+    {
+      "id": "gluten_cereals",
+      "name": "Cereals containing gluten",
+      "includes": ["wheat", "spelt", "Khorasan", "rye", "barley", "oats", "hybridised strains of these"],
+      "declaration_note": "Specific cereal types listed in Annex II (e.g. wheat, barley) must be declared and emphasised individually, e.g. 'wheat' or 'barley', not just 'gluten'."
+    },
+    {
+      "id": "crustaceans",
+      "name": "Crustaceans",
+      "includes": ["prawns", "lobster", "crabs", "crayfish"],
+      "declaration_note": "May be declared by the general word 'crustaceans' rather than each specific species."
+    },
+    {
+      "id": "egg",
+      "name": "Eggs",
+      "includes": ["hen egg", "duck egg", "goose egg", "ostrich egg"],
+      "declaration_note": "Declare as 'egg' or 'egg protein' etc."
+    },
+    {
+      "id": "fish",
+      "name": "Fish",
+      "includes": ["all fish and fish products"],
+      "declaration_note": "May be declared by the general word 'fish' (e.g. 'cod (fish)') rather than naming the species, unless the species itself is another allergen group (e.g. shellfish)."
+    },
+    {
+      "id": "peanut",
+      "name": "Peanuts",
+      "includes": ["peanuts and peanut products"],
+      "declaration_note": "Peanuts are legumes, not tree nuts, and are declared as their own separate allergen category."
+    },
+    {
+      "id": "soybeans",
+      "name": "Soybeans (soya)",
+      "includes": ["soybeans and soya products, e.g. soya lecithin"],
+      "declaration_note": "Declare as 'soya' or e.g. 'lecithin (soya)'."
+    },
+    {
+      "id": "milk",
+      "name": "Milk",
+      "includes": ["cows milk", "goats milk", "sheep milk", "lactose", "casein", "whey"],
+      "declaration_note": "Common dairy foods (cheese, cream, butter, yoghurt) are considered to clearly reference milk already. Less familiar products (fromage frais, Mascarpone, Quark) and milk derivatives (lactose, casein, whey) need explicit reference to milk, e.g. 'whey (milk)'."
+    },
+    {
+      "id": "tree_nuts",
+      "name": "Nuts",
+      "includes": ["almond", "hazelnut", "walnut", "cashew", "pecan nut", "Brazil nut", "pistachio nut", "macadamia nut (Queensland nut)"],
+      "declaration_note": "The specific nut type must be declared and emphasised, e.g. 'almonds', not just 'nuts'."
+    },
+    {
+      "id": "celery",
+      "name": "Celery",
+      "includes": ["celery stalks", "celery leaves", "celery seeds", "celeriac"],
+      "declaration_note": "Declare as 'celery'."
+    },
+    {
+      "id": "mustard",
+      "name": "Mustard",
+      "includes": ["mustard seed", "mustard powder", "prepared mustard"],
+      "declaration_note": "Declare as 'mustard'."
+    },
+    {
+      "id": "sesame",
+      "name": "Sesame seeds",
+      "includes": ["sesame seeds", "tahini", "sesame oil"],
+      "declaration_note": "Declare as 'sesame' or 'sesame seed', e.g. tahini should be flagged as containing sesame."
+    },
+    {
+      "id": "sulphites",
+      "name": "Sulphur dioxide / sulphites",
+      "includes": ["preservative E220-E228, often in dried fruit and wine"],
+      "declaration_note": "Only declarable where added and present above 10mg/kg (or 10mg/L) in the finished product."
+    },
+    {
+      "id": "lupin",
+      "name": "Lupin",
+      "includes": ["lupin flour/seeds, sometimes used in bread and pastries"],
+      "declaration_note": "Declare as 'lupin'."
+    },
+    {
+      "id": "molluscs",
+      "name": "Molluscs",
+      "includes": ["clams", "oysters", "scallops", "snails", "squid"],
+      "declaration_note": "May be declared by the general word 'molluscs'."
+    }
+  ],
+  "key_facts_for_schools_and_caterers": [
+    "Institutional caterers (schools, hospitals, childminders) fall within scope of the allergen rules with no exemption.",
+    "Where the consumer cannot make their own safe food choice (e.g. a young child), the institution has a duty of care to identify pre-existing allergies and ensure suitable, safe food is provided.",
+    "In schools, practical identification methods include coloured wristbands or a photo of the child with allergy details visible to kitchen/serving staff.",
+    "Blanket statements like 'all our foods contain allergens' are not compliant; specific allergen information must be given for the food actually supplied.",
+    "'May Contain' precautionary labelling (cross-contamination risk) is voluntary and is NOT covered by the mandatory EU FIC rules, but should be used after a real risk assessment.",
+    "Around 5-8% of children in the UK have a food allergy, compared to 1-2% of adults; allergic reactions to food cause approximately 10 deaths per year in the UK.",
+    "An allergic reaction can be triggered by a very small amount of allergen (e.g. a single sesame seed, a fragment of peanut), so trace-level cross-contamination matters even when an allergen is not a deliberate ingredient."
+  ],
+  "common_intolerances_not_legally_classed_as_allergens": [
+    {
+      "name": "Lactose intolerance",
+      "note": "Not an immune-system allergy; it is a digestive intolerance to lactose (milk sugar). Still requires avoiding/limiting milk and lactose-containing products, but is mechanistically different from a milk allergy and reactions are not typically life-threatening."
+    },
+    {
+      "name": "Gluten intolerance / coeliac disease",
+      "note": "Coeliac disease affects an estimated 1 in 100 people and requires strict avoidance of gluten-containing cereals (wheat, barley, rye, oats). 'Gluten-free' and 'very low gluten' claims are governed by separate legislation (EU Regulation No. 41/2009), not EU FIC directly."
+    }
+  ]
+}

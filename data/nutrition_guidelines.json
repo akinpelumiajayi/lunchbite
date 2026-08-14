@@ -1,0 +1,103 @@
+{
+  "sources": [
+    "A Quick Guide to the Government's Healthy Eating Recommendations (Public Health England, 2018)",
+    "Government Dietary Recommendations: energy and nutrients for males/females aged 1-18 and 19+ (Public Health England, 2016)"
+  ],
+  "eatwell_guide_principles": [
+    {
+      "food_group": "Fruit and vegetables",
+      "guidance": "Over a third of the diet should come from fruit and vegetables. Eat at least 5 portions of a variety of fruit and veg every day. A portion is about 80g.",
+      "lunchbox_application": "Aim to include at least 1-2 portions in a packed lunch (e.g. cherry tomatoes, carrot sticks, a piece of fruit), counted across the whole day's meals.",
+      "caveats": "Limit 100% fruit/vegetable juice and smoothies to a combined 150ml/day, consumed with meals (not as a between-meal snack) to reduce tooth decay risk. Dried fruit (30g) counts as one portion but should be eaten at mealtimes, not as a snack, for the same reason."
+    },
+    {
+      "food_group": "Potatoes, bread, rice, pasta and other starchy carbohydrates",
+      "guidance": "Base meals on starchy carbohydrates, choosing wholegrain versions where possible (wholemeal bread, wholewheat pasta, brown rice).",
+      "lunchbox_application": "The bread/wrap/pitta/bagel base of a lunchbox sandwich should ideally be wholegrain; mixing one white and one wholegrain slice is a reasonable compromise for children who dislike wholegrain."
+    },
+    {
+      "food_group": "Dairy and alternatives",
+      "guidance": "Include some dairy and alternatives, choosing lower-fat and lower-sugar options (e.g. semi-skimmed or skimmed milk, lower-fat/lower-sugar yoghurt, lower-fat cheese).",
+      "lunchbox_application": "A small yoghurt or a portion of milk in a lunchbox is a good way to meet this; choose reduced-fat cheese where used as a filling."
+    },
+    {
+      "food_group": "Beans, pulses, fish, eggs, meat and other proteins",
+      "guidance": "Eat some protein-rich foods including 2 portions of fish per week, one of which is oily (salmon, sardines, mackerel, kippers). No more than 70g red/processed meat per day on average.",
+      "lunchbox_application": "Rotate fish-based lunches (tuna, salmon) and pulse-based lunches (hummus, beans) alongside meat-based ones across the school week to build variety and meet the fish quota."
+    },
+    {
+      "food_group": "Oil and spreads",
+      "guidance": "Choose unsaturated oils and spreads and use in small amounts.",
+      "lunchbox_application": "Use lower-fat spreads sparingly on sandwiches."
+    },
+    {
+      "food_group": "Foods high in fat, salt and sugar",
+      "guidance": "Foods such as chocolate, cakes, biscuits, full-sugar soft drinks, crisps should be eaten less often and in small amounts; they are not necessary in the diet.",
+      "lunchbox_application": "Limit crisps and sweet treats to occasional inclusion; swap for homemade plain popcorn, plain rice cakes, fruit teacakes, or fruit (fresh/dried/tinned in juice)."
+    },
+    {
+      "food_group": "Fluids",
+      "guidance": "Aim for 6-8 glasses of fluid a day; water, lower-fat milk, and sugar-free drinks (including tea/coffee for adults) all count.",
+      "lunchbox_application": "Water or milk is the best lunchbox drink choice; if including fruit juice, limit to 150ml combined with any other juice/smoothie consumed that day."
+    }
+  ],
+  "energy_distribution_convention": {
+    "note": "By convention, based on an average 2000kcal/day woman's energy requirement (figures will scale differently for children, see age-band tables below):",
+    "breakfast_share": "~400kcal (1.7MJ)",
+    "lunch_share": "~600kcal (2.5MJ)",
+    "evening_meal_share": "~600kcal (2.5MJ)",
+    "snacks_and_drinks_share": "~400kcal (1.7MJ)"
+  },
+  "child_age_band_recommendations": {
+    "note": "Values drawn from Government Dietary Recommendations (PHE 2016) Tables 1, 3 and 5. Energy figures for 11-18 are capped at 2500kcal/day (males) and 2000kcal/day (females) for obesity prevention. A rough rule-of-thumb lunch target is about 25-30% of daily energy, consistent with the ~600kcal lunch convention.",
+    "age_4_6": {
+      "energy_kcal_day": {"male": 1482, "female": 1378},
+      "approx_lunch_target_kcal": "370-440",
+      "free_sugars_g_day_max": {"male": 20, "female": 18},
+      "salt_g_day_max": 3.0,
+      "fibre_g_day": "15 (age 4), 20 (age 5-6)",
+      "protein_g_day": 19.7,
+      "calcium_mg_day": 450,
+      "iron_mg_day": 6.1
+    },
+    "age_7_10": {
+      "energy_kcal_day": {"male": 1817, "female": 1703},
+      "approx_lunch_target_kcal": "450-540",
+      "free_sugars_g_day_max": {"male": 24, "female": 23},
+      "salt_g_day_max": 5.0,
+      "fibre_g_day": 20,
+      "protein_g_day": 28.3,
+      "calcium_mg_day": 550,
+      "iron_mg_day": 8.7,
+      "vitamin_c_mg_day": 30,
+      "vitamin_d_ug_day": 10
+    },
+    "age_11_14": {
+      "energy_kcal_day": {"male": 2500, "female": 2000},
+      "approx_lunch_target_kcal": "625-750 (male), 500-600 (female)",
+      "free_sugars_g_day_max": {"male": 33, "female": 27},
+      "salt_g_day_max": 6.0,
+      "fibre_g_day": 25,
+      "protein_g_day": {"male": 42.1, "female": 41.2},
+      "calcium_mg_day": {"male": 1000, "female": 800},
+      "iron_mg_day": {"male": 11.3, "female": 14.8},
+      "note_iron": "Higher iron recommendation for females 11-18 reflects menstrual losses; SACN notes this may still be insufficient for those with heavy menstrual losses, where supplementation may be the practical solution."
+    },
+    "age_15_18": {
+      "energy_kcal_day": {"male": 2500, "female": 2000},
+      "approx_lunch_target_kcal": "625-750 (male), 500-600 (female)",
+      "free_sugars_g_day_max": {"male": 33, "female": 27},
+      "salt_g_day_max": 6.0,
+      "fibre_g_day": 30,
+      "protein_g_day": {"male": 55.2, "female": 45.0},
+      "calcium_mg_day": {"male": 1000, "female": 800},
+      "iron_mg_day": {"male": 11.3, "female": 14.8}
+    }
+  },
+  "school_safe_constraints": [
+    "Many UK primary schools operate a 'nut-free' policy across the whole school (not just for individual allergic children) due to the severity and prevalence of nut allergies; lunches should avoid peanuts and tree nuts entirely when a school is flagged as nut-free.",
+    "Schools, as institutional caterers, are legally required to identify children's allergies and ensure safe food is provided (see allergen_rules knowledge base); a lunch recommendation system must treat any stated allergy as an absolute exclusion, not a soft preference.",
+    "Fizzy/sugary drinks and confectionery are commonly restricted or discouraged in UK school lunchbox policies, consistent with the 'eat less often, in small amounts' guidance for high fat/salt/sugar foods.",
+    "Dried fruit and fruit juice, while counting toward 5-a-day, are best limited to mealtimes only (not snack-time) due to tooth decay risk, which is relevant when scheduling a lunch versus a snack."
+  ]
+}
