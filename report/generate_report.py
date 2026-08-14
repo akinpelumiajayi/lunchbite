@@ -709,7 +709,7 @@ def generate_report(
 
     # ── 8. Known Limitations ─────────────────────────────────────────────────
     L += [
-        "## 8. Known Limitations",
+        "## 9. Known Limitations",
         "",
         "- **Corpus size (29 recipes):** Some constraint combinations (fish + gluten) yield",
         "  zero safe candidates. Both `no_llm` and `neurosymbolic` correctly return no",
@@ -747,7 +747,7 @@ def generate_report(
 
     # ── 9. Reproducing This Report ────────────────────────────────────────────
     L += [
-        "## 9. Reproducing This Report",
+        "## 10. Reproducing This Report",
         "",
         "```bash",
         "# Configure .env (copy from .env.example and fill in keys)",
