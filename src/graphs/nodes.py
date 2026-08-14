@@ -457,13 +457,46 @@ def symbolic_postfilter(state: PipelineState) -> Dict[str, Any]:
                         "symbolic_verified": False})
             continue
         result = check_recipe_against_profile(recipe, profile)
-        if result.passed:
-            log.append({"recipe_id": rid, "menu_name": menu.get("menu_name", ""), "survived": True,
-                        "rejection_reason": None, "symbolic_verified": True})
-            final.append(menu)
-        else:
+
+        # The model's own allergen claim is checked against the recipe record.
+        # Re-running the guardrail catches a recipe that is unsafe *for this
+        # profile*; it does not catch the model asserting "contains no milk"
+        # about a recipe whose allergens_present says otherwise. That assertion
+        # is what a reader would rely on, so a contradiction is a rejection.
+        claimed_absent = {a.lower() for a in (menu.get("allergens_confirmed_absent") or [])}
+        actually_present = {a.lower() for a in (recipe.get("allergens_present") or [])}
+        contradictions = sorted(claimed_absent & actually_present)
+
+        if not result.passed:
             log.append({"recipe_id": rid, "menu_name": menu.get("menu_name", ""), "survived": False,
-                        "rejection_reason": "; ".join(result.reasons_for_rejection), "symbolic_verified": False})
+                        "rejection_reason": "; ".join(result.reasons_for_rejection),
+                        "symbolic_verified": False})
+            continue
+
+        if contradictions:
+            log.append({"recipe_id": rid, "menu_name": menu.get("menu_name", ""), "survived": False,
+                        "rejection_reason": (
+                            f"Model claimed absent but recipe lists as present: "
+                            f"{', '.join(contradictions)}"),
+                        "symbolic_verified": False,
+                        "false_allergen_claim": contradictions})
+            continue
+
+        # Traceability: the citation the model hands back is not evidence until
+        # it matches the citation attached to that recipe. A mismatch is repaired
+        # rather than rejected — the recipe itself is safe, and silently shipping
+        # a fabricated source is the actual harm. The flag makes fabrication
+        # measurable instead of invisible.
+        entry = {"recipe_id": rid, "menu_name": menu.get("menu_name", ""), "survived": True,
+                 "rejection_reason": None, "symbolic_verified": True}
+        expected_citation = recipe.get("citation", recipe.get("source", "")) or ""
+        returned_citation = (menu.get("source_citation") or "").strip()
+        if expected_citation and returned_citation != expected_citation:
+            menu = {**menu, "source_citation": expected_citation}
+            entry["citation_corrected"] = True
+            entry["citation_returned"] = returned_citation
+        log.append(entry)
+        final.append(menu)
     return {"symbolic_post_filter_log": log, "final_menus": final,
             "latency_ms": _merge_latency(state, "symbolic_postfilter", t0)}
 
