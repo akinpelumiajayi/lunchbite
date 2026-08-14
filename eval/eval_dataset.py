@@ -13,8 +13,8 @@ Each EvalQuery has:
     compute precision/recall/MRR/NDCG honestly rather than vibes-checking
     retrieval output.
 
-IMPORTANT ON GROUND-TRUTH VALIDITY: with only 9 recipes, "relevant" is
-judged by a strict, auditable rule per query type:
+IMPORTANT ON GROUND-TRUTH VALIDITY: "relevant" is judged by a strict, auditable
+rule per query type, applied to the CURRENT 29-recipe corpus:
   - allergen-exclusion queries: relevant = recipes whose `allergens_present`
     does NOT include the named allergen (i.e. the recipes that SHOULD show
     up as safe candidates)
@@ -26,9 +26,25 @@ judged by a strict, auditable rule per query type:
     that directly answer the query, identified by reading
     nutrition_guidelines.json / allergen_rules.json directly
 
-This is a small benchmark (appropriate for a 38-chunk knowledge base) and is
-intended to be illustrative and honest about its own limitations, not a
-large-scale IR benchmark.
+These labels were re-derived against all 29 recipes. They previously covered
+only recipe_001-009, from when the corpus was that size: recipes 010-029 that
+genuinely satisfied a query were scored as false positives, so reported
+precision was understated and recall was measured against a ground truth that
+was missing two thirds of the corpus. Any Part A number published before that
+re-derivation describes a system that no longer exists.
+
+READ THIS BEFORE QUOTING PRECISION: the two allergen-exclusion queries are
+weak IR tests on this corpus and are kept for coverage, not discrimination.
+"egg-free" matches 23 of 29 recipes (79%) and "milk-free" 15 of 29 (52%), so
+P@5 is close to 1.0 for almost any retriever, including a random one. The
+discriminative queries are the topical ones with small relevant sets: fish (3),
+gluten-free (4), vegetarian-with-cheese (4), chicken (5), hummus (5). Report
+those separately, or the headline precision is mostly measuring how large the
+relevant set is.
+
+This is a small benchmark (58 chunks over 29 recipes plus guideline and
+allergen-rule documents) and is intended to be illustrative and honest about
+its own limitations, not a large-scale IR benchmark.
 """
 
 from dataclasses import dataclass, field
@@ -56,39 +72,60 @@ RECIPE_QUERIES: list[EvalQuery] = [
     ),
     EvalQuery(
         query="milk-free dairy-free lunch",
-        relevant_ids={"recipe_003", "recipe_004", "recipe_005", "recipe_008", "recipe_009"},
+        relevant_ids={
+            "recipe_003", "recipe_004", "recipe_005", "recipe_008", "recipe_009",
+            "recipe_010", "recipe_011", "recipe_013", "recipe_017", "recipe_018",
+            "recipe_019", "recipe_021", "recipe_023", "recipe_025", "recipe_027",
+        },
         source_types=["recipe"],
-        notes="Recipes whose allergens_present does NOT include milk (egg bap, hummus wrap, salmon bagel, tuna salad, tuna sandwich).",
+        notes="All 15 recipes whose allergens_present does NOT include milk. "
+              "LOW DISCRIMINATION: 52% of the corpus — see module docstring.",
     ),
     EvalQuery(
         query="high protein chicken lunch",
-        relevant_ids={"recipe_007"},
+        relevant_ids={"recipe_007", "recipe_011", "recipe_014", "recipe_019", "recipe_027"},
         source_types=["recipe"],
-        notes="Only recipe with chicken as the named protein and explicitly tagged high-protein.",
+        notes="All 5 recipes containing chicken; every one is also tagged high-protein "
+              "(28.0-48.0g per serving), so the two conditions do not separate here.",
     ),
     EvalQuery(
         query="egg-free lunch option",
-        relevant_ids={"recipe_001", "recipe_002", "recipe_004", "recipe_006", "recipe_007", "recipe_008"},
+        relevant_ids={
+            "recipe_001", "recipe_002", "recipe_004", "recipe_006", "recipe_007",
+            "recipe_008", "recipe_010", "recipe_011", "recipe_012", "recipe_013",
+            "recipe_014", "recipe_015", "recipe_017", "recipe_018", "recipe_020",
+            "recipe_021", "recipe_022", "recipe_024", "recipe_025", "recipe_026",
+            "recipe_027", "recipe_028", "recipe_029",
+        },
         source_types=["recipe"],
-        notes="Recipes whose allergens_present does NOT include egg.",
+        notes="All 23 recipes whose allergens_present does NOT include egg. "
+              "LOW DISCRIMINATION: 79% of the corpus — see module docstring.",
     ),
     EvalQuery(
         query="vegetarian sandwich with cheese",
-        relevant_ids={"recipe_001", "recipe_006"},
+        relevant_ids={"recipe_001", "recipe_006", "recipe_012", "recipe_028"},
         source_types=["recipe"],
-        notes="The two recipes that are both vegetarian AND explicitly contain cheese (cheesy coleslaw pitta, soft cheese sandwich).",
+        notes="Vegetarian AND contains cheese: cheesy coleslaw pitta, soft cheese "
+              "sandwich, English muffin mini pizza, grilled cheese. The other cheese "
+              "recipes (015, 020, 022) contain turkey or ham and are not vegetarian.",
     ),
     EvalQuery(
         query="gluten-free wheat-free lunch",
-        relevant_ids=set(),  # genuinely zero -- every recipe uses bread/pitta/wrap/bagel/bap
+        relevant_ids={"recipe_013", "recipe_014", "recipe_021", "recipe_024"},
         source_types=["recipe"],
-        notes="Trick query: every single recipe in this 9-item dataset contains wheat. Correct retrieval behavior is to surface nothing strongly relevant, not to force a false positive.",
+        notes="NO LONGER A TRICK QUERY. On the original 9-recipe corpus every recipe "
+              "contained wheat, so the correct answer was the empty set. The expanded "
+              "corpus added four genuinely gluten-free options (black beans and rice, "
+              "baked chicken drumstick, brown rice bowl, sweet potato bake), so a "
+              "retriever that returns nothing is now wrong rather than right.",
     ),
     EvalQuery(
         query="hummus chickpea recipe",
-        relevant_ids={"recipe_002", "recipe_004"},
+        relevant_ids={"recipe_002", "recipe_004", "recipe_018", "recipe_021", "recipe_023"},
         source_types=["recipe"],
-        notes="The two hummus-based recipes.",
+        notes="All 5 recipes with hummus or chickpeas in the ingredients, including "
+              "the brown rice bowl and the snack box where hummus is a component "
+              "rather than the headline item.",
     ),
 ]
 
