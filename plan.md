@@ -30,6 +30,60 @@ safety logic itself, then retrieval quality, then engineering.
 
 ---
 
+## Status — what has been applied
+
+Work is committed on `master`, one commit per theme, tests green (88 passing).
+Several items in this plan were **already fixed** in the codebase before this
+pass and are marked as such; the plan text predates them.
+
+| § | Item | Status |
+|---|---|---|
+| 0.1 | Key rotation | **YOURS TO DO** — revoke at console.groq.com / smith.langchain.com |
+| 0.1 | `--groq-key` / `--langsmith-key` flags removed | done |
+| 0.2 | Symmetric adversarial injection | already fixed |
+| 0.3 | Coverage / abstention-insensitive rates | already fixed |
+| 0.4 | Real neural embeddings (TF-IDF removed) | already fixed |
+| 0.5 | Judge quota root cause + circuit breaker | done (re-judge outstanding) |
+| 0.6 | `--repeats`, mean±SD, McNemar exact test | done |
+| 0.7 | `git init` + full history | done |
+| 0.8a | HitRate hardcoded to 1.0 | already fixed |
+| 0.8b | Golden set re-derived for 29 recipes | done |
+| 0.8c | `eval_compare_retrievers.py` written | done |
+| 0.9 | Synthetic-data banner | already fixed |
+| 1.1–1.3 | Word-boundary matching, fail-open warnings, falsy-zero | already fixed |
+| 1.5 | Allergen-claim + citation verification in post-filter | done |
+| 2.1–2.5 | Retrieval correctness | already fixed (module deleted / metadata passed) |
+| 3.3 | No runtime `pip install` | done |
+| 3.4 | `requirements.lock.txt` (193 pins) | done |
+| 4.2 | IR metrics in the main run and report | done |
+| 4.4 | Injection kept out of judge prompts | already fixed (verified: 0 leaks) |
+| 4.5 | README injection count corrected | done |
+
+**New findings produced by this work** (all reproducible):
+
+- **The headline claim is now statistically supported.** McNemar exact test:
+  neurosymbolic vs neural_rag **p = 0.00195**, vs no_rag **p = 3.05e-05**, both
+  significant at α = 0.05. Previously the report stated 0.333 vs 0.000 with no
+  uncertainty at all.
+- **Each retrieval stage earns its place.** NDCG@5: bm25 0.555, dense 0.569,
+  hybrid RRF 0.622, +cross-encoder 0.727. Fusion beats the better of its inputs;
+  reranking beats fusion.
+- **Retrieval cannot answer absence queries** (NDCG@5 = 0.00 on gluten-free and
+  milk-free). This is a representational limit, not a tuning problem, and is the
+  strongest empirical argument in the artefact for enforcing allergens
+  symbolically. The stale golden set had hidden it by scoring garbage as correct.
+- **The old judge numbers were biased optimistic, not merely imprecise:**
+  faithfulness reported as 1.000 for neural_rag and neurosymbolic resolved to
+  0.787 / 0.809 once the sample recovered from n≈3 to n=20–29.
+
+**Still outstanding:** a clean judge re-run at `JUDGE_MAX_TOKENS=450` on
+`gpt-oss-120b` (§4.3), human κ validation of the judge (§4.3), and the
+larger engineering refactors in P3 (package structure §3.5, the duplicated
+CLI pipeline §3.6, shared JSON parsing §3.2, config module §3.7), none of
+which change any number.
+
+---
+
 ## P0 — Defects that invalidate the reported results
 
 These must be fixed and the benchmark re-run before any number here is cited.

@@ -389,16 +389,24 @@ they establish a relevance and safety floor.
 allergy, vegan profile, and milk+gluten+nut. Tests whether constraint combinations
 are handled correctly and gracefully when zero safe candidates exist.
 
-**Adversarial (8 cases):** Prompt-injection attacks instructing the LLM to ignore
-constraints. Eight distinct injection strategies:
+**Adversarial (8 cases):** Attacks on the constraint layer. **Six** carry a
+prompt injection instructing the LLM to ignore constraints; the other two are
+robustness tests with no injected text, which is why every run reports
+`adversarial_cases_tested: 6` rather than 8.
+
+Six injection strategies (ADV-01, 03, 05, 06, 07, 08):
 - SYSTEM OVERRIDE / research mode
-- Allergen synonym ambiguity (groundnut = peanut)
 - Hallucinated recipe_id (recipe_999 "pre-approved")
-- Misleading framing ("dairy-free" profiling for egg allergy)
 - Allergy cured / outgrown
 - Medical exception ("fish safe in small amounts")
 - Policy change ("school no longer nut-free")
 - Category minimisation ("celery is just a vegetable")
+
+Two non-injection robustness cases:
+- ADV-02: allergen synonym ambiguity (peanut allergy named "groundnut") — tests
+  synonym normalisation in the guardrail, not prompt resistance
+- ADV-04: misleading framing (egg allergy described in "dairy-free" terms) —
+  tests whether the profile is read correctly, with no adversarial instruction
 
 **Edge (5 cases):** Age 4 (tightest sugar limit), age 18 (oldest band), unknown
 allergen "kiwi", peanut synonym at age 5, and age 14 with no restrictions.
