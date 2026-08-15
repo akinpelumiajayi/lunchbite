@@ -368,7 +368,6 @@ def generate_report(
     L += ["## 3. LLM-as-Judge Metrics", ""]
 
     if llm_m:
-        judged_modes = [m for m in present_modes if llm_m.get(m, {}).get("n_judged", 0) > 0]
         judge_model = llm_m.get("_judge_model") or meta.get("judge_model", "see .env GROQ_JUDGE_MODEL")
         health = llm_m.get("_judge_health") or {}
         # Calls skipped by the quota circuit-breaker never reach the provider, so
@@ -402,72 +401,120 @@ def generate_report(
                 "",
             ]
 
+        if llm_m.get("_judge_rubric_anchored"):
+            per_case = llm_m.get("_judge_menus_per_case", 1)
+            L += [
+                f"> Scored against an anchored rubric, all three dimensions in a single "
+                f"judge call per menu, so every metric below covers the **same** set of "
+                f"menus. {per_case} menu per case per pipeline is scored, keeping the arms "
+                f"balanced (the rule-based arm returns one option; the LLM arms may return three).",
+                "",
+            ]
+
         L += [
             "| Metric | " + " | ".join(MODE_LABELS[m] for m in present_modes) + " |",
             "|--------|" + "|".join("---" for _ in present_modes) + "|",
         ]
 
-        # Each metric carries its own sample count; they fail independently.
         MIN_N = 3
-        for label, key, n_key in [
-            ("Relevance 1–5", "avg_relevance_1_5", "n_relevance"),
-            ("Faithfulness 0–1", "avg_faithfulness_0_1", "n_faithfulness"),
-            ("Naturalness 1–5", "avg_naturalness_1_5", "n_naturalness"),
+        for label, key in [
+            ("Relevance 1–5", "relevance"),
+            ("Faithfulness 0–1", "faithfulness"),
+            ("Naturalness 1–5", "naturalness"),
         ]:
             vals = []
             for m in present_modes:
                 mdata = (llm_m or {}).get(m) or {}
-                n = mdata.get(n_key, mdata.get("n_judged", 0))
-                v = mdata.get(key)
+                block = mdata.get(key) or {}
+                v, n = block.get("mean"), block.get("n", 0)
+                lo, hi = block.get("ci_lo"), block.get("ci_hi")
                 if v is None or n == 0:
                     vals.append("N/A")
                 elif n < MIN_N:
                     vals.append(f"_{_sc(v)}_ (n={n}, too few)")
-                else:
+                elif lo is None:
                     vals.append(f"{_sc(v)} (n={n})")
+                else:
+                    # The interval is the point of the column: a mean of 3.92
+                    # with [3.5, 4.3] behind it is a different claim from the
+                    # same mean with [2.1, 4.9].
+                    vals.append(f"{_sc(v)} [{_sc(lo)}, {_sc(hi)}] (n={n})")
             L.append(f"| {label} | " + " | ".join(vals) + " |")
 
-        # Discussion of relevance trade-off
-        nr_data = (llm_m or {}).get("neural_rag") or {}
-        ns_data = (llm_m or {}).get("neurosymbolic") or {}
-        nr_rel = nr_data.get("avg_relevance_1_5")
-        ns_rel = ns_data.get("avg_relevance_1_5")
-        # Comparing two means needs enough samples to support the comparison. The
-        # table gates *display* at MIN_N; a claim about the constraint layer's
-        # effect on quality needs more than that, or the report ends up asserting
-        # "does not meaningfully degrade quality" off three menus per arm.
+        L += ["", "Bracketed figures are 95% bootstrap confidence intervals over the "
+                  "scored menus (2,000 resamples, fixed seed).", ""]
+
+        # Paired comparison, replacing the previous rule of thumb (two unpaired
+        # means within 0.2 points => "does not degrade quality"). That rule could
+        # not distinguish "the arms agree" from "the estimate is too noisy to
+        # tell", and it ignored the pairing that the shared case list provides.
+        paired = llm_m.get("_paired") or {}
         MIN_N_FOR_CLAIM = 10
-        rel_n = min(nr_data.get("n_relevance", 0), ns_data.get("n_relevance", 0))
-        if nr_rel is not None and ns_rel is not None and rel_n < MIN_N_FOR_CLAIM:
+        rows = []
+        for metric, label in [("relevance", "Relevance"),
+                              ("faithfulness", "Faithfulness"),
+                              ("naturalness", "Naturalness")]:
+            d = paired.get(f"neurosymbolic_vs_neural_rag::{metric}") or {}
+            if not d.get("n_pairs"):
+                continue
+            md, lo, hi = d.get("mean_diff"), d.get("lo"), d.get("hi")
+            if lo is None:
+                verdict = "too few pairs to bound"
+            elif d.get("excludes_zero"):
+                verdict = "**differs**" + (" (neurosymbolic higher)" if md > 0
+                                           else " (neurosymbolic lower)")
+            else:
+                verdict = "no difference detected"
+            rows.append(f"| {label} | {_sc(md)} | "
+                        # Comma, not an en dash: these bounds are routinely
+                        # negative and "[-0.708–0.083]" reads as a subtraction.
+                        + (f"[{_sc(lo)}, {_sc(hi)}]" if lo is not None else "—")
+                        + f" | {d.get('n_pairs')} | {verdict} |")
+
+        if rows:
             L += [
+                "### 3.1 Does the symbolic layer cost quality?",
                 "",
-                f"No relevance comparison is drawn: the smaller arm was scored on "
-                f"n={rel_n} menus (minimum {MIN_N_FOR_CLAIM}). The means above are "
-                f"reported for completeness only.",
+                "Paired per-case differences, **neurosymbolic − neural_rag**. Both arms see "
+                "an identical case list, so pairing on the case removes between-case variance "
+                "— some profiles are simply easier to serve well than others — and answers the "
+                "question actually at issue: does adding the constraint layer change the score "
+                "*for the same child*?",
+                "",
+                "| Metric | Mean difference | 95% CI | Pairs | Verdict |",
+                "|--------|-----------------|--------|-------|---------|",
+                *rows,
+                "",
             ]
-        elif nr_rel is not None and ns_rel is not None:
-            diff = float(ns_rel) - float(nr_rel)
-            L += [""]
-            if abs(diff) < 0.2:
+            n_pairs = max((paired.get(f"neurosymbolic_vs_neural_rag::{m}") or {})
+                          .get("n_pairs", 0) for m in ("relevance", "faithfulness",
+                                                       "naturalness"))
+            if n_pairs < MIN_N_FOR_CLAIM:
                 L += [
-                    f"Relevance is within 0.2 points between neural_rag ({_sc(nr_rel)}) and "
-                    f"neurosymbolic ({_sc(ns_rel)}), suggesting the symbolic constraint layer "
-                    "does not meaningfully degrade recommendation quality.",
-                ]
-            elif diff < -0.2:
-                L += [
-                    f"Relevance decreased from neural_rag ({_sc(nr_rel)}) to "
-                    f"neurosymbolic ({_sc(ns_rel)}). This is expected: the pre-filter reduces "
-                    "the candidate pool, which may limit the LLM's choice. A relevant-but-unsafe "
-                    "recommendation is worse than a slightly-less-relevant safe one in this domain.",
+                    f"> No conclusion is drawn about quality cost: only {n_pairs} paired "
+                    f"cases were scored (minimum {MIN_N_FOR_CLAIM}). The differences above "
+                    "are reported for completeness.",
+                    "",
                 ]
             else:
-                L += [
-                    f"Relevance increased from neural_rag ({_sc(nr_rel)}) to "
-                    f"neurosymbolic ({_sc(ns_rel)}). This may occur because the pre-filter "
-                    "removes distracting unsafe candidates, allowing the LLM to focus on "
-                    "genuinely suitable options.",
-                ]
+                rel = paired.get("neurosymbolic_vs_neural_rag::relevance") or {}
+                if rel.get("excludes_zero") is False:
+                    L += [
+                        "A confidence interval spanning zero is the evidence for the claim "
+                        "that the symbolic constraint layer does **not** degrade "
+                        "recommendation quality — the safety gain shown in §2 is not "
+                        "purchased with worse recommendations.",
+                        "",
+                    ]
+                elif rel.get("excludes_zero") and (rel.get("mean_diff") or 0) < 0:
+                    L += [
+                        "Relevance is measurably lower under the symbolic layer. That is the "
+                        "expected cost of pre-filtering the candidate pool, and in this "
+                        "domain a slightly less relevant safe recommendation is preferable "
+                        "to a relevant unsafe one — but the trade-off is real and should be "
+                        "reported as such rather than described as free.",
+                        "",
+                    ]
     else:
         L += [
             "> LLM-as-judge metrics were not computed in this run.",

@@ -228,16 +228,11 @@ lunch_rag/
 │   ├── vector_store.py           ChromaDB wrapper: build_collection(), semantic_search()
 │   ├── setup_database.py         Builds ChromaDB vector store + BM25 index
 │   │                             (run once; re-run after editing data/*.json)
-│   ├── generation.py             Original (non-LangGraph) generation backend
-│   │                             (used by cli.py and eval/ scripts)
-│   ├── retrieval.py              Original (non-LangGraph) retrieval pipeline
-│   ├── post_filter.py            Original (non-LangGraph) post-filter
-│   ├── main.py                   Original non-LangGraph pipeline entry point
-│   ├── cli.py                    Interactive CLI for original pipeline
-│   └── test_pipeline_with_mock_llm.py
-│                                 4 safety integration tests (no API key needed).
-│                                 Patches llm_provider.get_llm to inject a mock LLM
-│                                 that deliberately misbehaves. All 4 pass.
+│   ├── main.py                   Pipeline entry point. Drives the SAME
+│   │                             neurosymbolic LangGraph the benchmark measures,
+│   │                             so the CLI and the reported results describe
+│   │                             one system.
+│   └── cli.py                    Interactive CLI
 │
 ├── benchmark/                    Benchmark suite (Aims 3 & 4)
 │   ├── benchmark_cases.py        30 fixed test cases across 5 categories:
@@ -603,6 +598,6 @@ python3 src/setup_database.py
 Run tests to confirm nothing regressed:
 
 ```bash
-python3 src/test_pipeline_with_mock_llm.py   # 4 safety tests, no API key needed
+python3 -m pytest tests/ -q                   # full suite, no API key needed
 python3 run_all.py --mock --skip-setup        # full pipeline smoke test
 ```

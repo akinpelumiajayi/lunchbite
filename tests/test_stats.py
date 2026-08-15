@@ -20,9 +20,11 @@ sys.path.insert(0, os.path.join(ROOT, "benchmark"))
 
 from stats import (  # noqa: E402
     _binom_sf_inclusive,
+    bootstrap_ci,
     case_violated,
     mcnemar,
     outcomes_by_case,
+    paired_score_diff,
     repeat_variance,
 )
 
@@ -163,3 +165,124 @@ def test_variance_mean_and_sd_across_repeats():
     assert vr["mean"] == pytest.approx(0.5)
     assert vr["sd"] == pytest.approx(0.7071, abs=1e-3)   # sample SD of [1, 0]
     assert sorted(vr["per_repeat"]) == [0.0, 1.0]
+
+
+# ── bootstrap CI ─────────────────────────────────────────────────────────────
+
+def test_bootstrap_ci_brackets_the_mean():
+    xs = [3, 4, 4, 5, 3, 4, 5, 4, 3, 4]
+    ci = bootstrap_ci(xs)
+    assert ci["n"] == 10
+    assert ci["mean"] == pytest.approx(3.9, abs=1e-9)
+    assert ci["lo"] <= ci["mean"] <= ci["hi"]
+
+
+def test_bootstrap_ci_is_deterministic():
+    """A CI that moves between runs of the same data cannot be cited."""
+    xs = [1, 2, 3, 4, 5, 4, 3, 2, 5, 1, 3]
+    assert bootstrap_ci(xs) == bootstrap_ci(xs)
+
+
+def test_bootstrap_ci_of_constant_data_has_zero_width():
+    ci = bootstrap_ci([4.0] * 8)
+    assert (ci["mean"], ci["lo"], ci["hi"]) == (4.0, 4.0, 4.0)
+
+
+def test_bootstrap_ci_stays_inside_the_scale():
+    """The reason for bootstrapping rather than a normal approximation: a mean
+    of 4.9 on a 1-5 scale must not produce an upper bound above 5."""
+    ci = bootstrap_ci([5, 5, 5, 5, 5, 5, 5, 5, 5, 4])
+    assert ci["hi"] <= 5.0
+    assert ci["lo"] >= 1.0
+
+
+def test_bootstrap_ci_refuses_tiny_samples():
+    assert bootstrap_ci([4.0, 5.0])["lo"] is None
+    assert bootstrap_ci([])["n"] == 0
+    assert bootstrap_ci([])["mean"] is None
+
+
+def test_wider_spread_gives_wider_interval():
+    tight = bootstrap_ci([4, 4, 4, 4, 4, 4, 4, 4, 3, 5])
+    loose = bootstrap_ci([1, 5, 1, 5, 1, 5, 1, 5, 1, 5])
+    assert (loose["hi"] - loose["lo"]) > (tight["hi"] - tight["lo"])
+
+
+# ── paired judge-score differences ───────────────────────────────────────────
+
+def rec(case_id, mode, *, relevance=None, faithfulness=None, repeat=0):
+    return {"case_id": case_id, "mode": mode, "repeat": repeat,
+            "relevance": relevance, "faithfulness": faithfulness}
+
+
+def test_paired_diff_only_uses_cases_both_arms_scored():
+    records = [
+        rec("A", "neurosymbolic", relevance=4), rec("A", "neural_rag", relevance=3),
+        rec("B", "neurosymbolic", relevance=5), rec("B", "neural_rag", relevance=4),
+        # C scored for one arm only — must not contribute a phantom pair.
+        rec("C", "neurosymbolic", relevance=1),
+    ]
+    d = paired_score_diff(records, "neurosymbolic", "neural_rag", "relevance")
+    assert d["n_pairs"] == 2
+    assert d["mean_diff"] == pytest.approx(1.0)
+
+
+def test_paired_diff_skips_unscored_metric():
+    """A menu whose relevance failed to parse is not a pair, even though the
+    same menu's faithfulness scored fine."""
+    records = [
+        rec("A", "neurosymbolic", relevance=None, faithfulness=0.9),
+        rec("A", "neural_rag", relevance=4, faithfulness=0.5),
+        rec("B", "neurosymbolic", relevance=4, faithfulness=0.8),
+        rec("B", "neural_rag", relevance=4, faithfulness=0.4),
+    ]
+    assert paired_score_diff(records, "neurosymbolic", "neural_rag",
+                             "relevance")["n_pairs"] == 1
+    assert paired_score_diff(records, "neurosymbolic", "neural_rag",
+                             "faithfulness")["n_pairs"] == 2
+
+
+def test_paired_diff_pairs_within_repeat_not_across():
+    """Repeat 0 of one arm must pair with repeat 0 of the other, not repeat 1."""
+    records = [
+        rec("A", "neurosymbolic", relevance=5, repeat=0),
+        rec("A", "neural_rag", relevance=4, repeat=0),
+        rec("A", "neurosymbolic", relevance=2, repeat=1),
+        rec("A", "neural_rag", relevance=1, repeat=1),
+    ]
+    d = paired_score_diff(records, "neurosymbolic", "neural_rag", "relevance")
+    assert d["n_pairs"] == 2
+    assert d["mean_diff"] == pytest.approx(1.0)
+
+
+def test_paired_diff_detects_a_real_difference():
+    records = []
+    for i in range(12):
+        records.append(rec(f"C{i}", "neurosymbolic", relevance=5))
+        records.append(rec(f"C{i}", "neural_rag", relevance=3))
+    d = paired_score_diff(records, "neurosymbolic", "neural_rag", "relevance")
+    assert d["excludes_zero"] is True
+    assert d["mean_diff"] == pytest.approx(2.0)
+
+
+def test_paired_diff_reports_no_difference_when_arms_agree():
+    """The claim 'the symbolic layer does not degrade quality' rests on this
+    case producing an interval that spans zero."""
+    scores = [4, 3, 5, 4, 4, 3, 5, 5, 4, 3, 4, 4]
+    records = []
+    for i, s in enumerate(scores):
+        records.append(rec(f"C{i}", "neurosymbolic", relevance=s))
+        records.append(rec(f"C{i}", "neural_rag", relevance=s))
+    d = paired_score_diff(records, "neurosymbolic", "neural_rag", "relevance")
+    assert d["excludes_zero"] is False
+    assert d["mean_diff"] == pytest.approx(0.0)
+
+
+def test_paired_diff_with_no_overlap_is_undecidable_not_negative():
+    """excludes_zero must be None, not False: 'no pairs' is not evidence of
+    equivalence."""
+    records = [rec("A", "neurosymbolic", relevance=4),
+               rec("B", "neural_rag", relevance=2)]
+    d = paired_score_diff(records, "neurosymbolic", "neural_rag", "relevance")
+    assert d["n_pairs"] == 0
+    assert d["excludes_zero"] is None

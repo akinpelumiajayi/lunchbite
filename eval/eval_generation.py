@@ -1,8 +1,9 @@
 """
 eval_generation.py -- Evaluates generation quality using LLM-as-judge.
 
-Uses llm_provider.get_llm() for both generation and judging, which
-reads from .env automatically and supports Groq or Ollama.
+Generation runs through the neurosymbolic LangGraph (via main.run_pipeline);
+judging uses llm_provider.get_judge_llm(), a deliberately different model. Both
+read from .env automatically and support Groq or Ollama.
 
 Metrics:
   Faithfulness  -- are factual claims grounded in the retrieved context?
@@ -21,25 +22,45 @@ from typing import Any, Dict, List, Optional
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
+sys.path.insert(0, str(ROOT / "src" / "graphs"))
+
 from guardrails import ChildProfile
-from retrieval import run_retrieval
-from generation import generate_menus
+# The neurosymbolic LangGraph, via main -- the same pipeline the benchmark runs.
+# This module used to drive a second, drifted implementation, so its scores did
+# not describe the system any published result referred to.
+from main import run_pipeline, supporting_context
 
 
 # ── Judge call helper ─────────────────────────────────────────────────────────
+
+_judge_llm_cache: Dict[str, Any] = {}
+
 
 def _judge_call(prompt: str, max_tokens: int = 1500) -> Dict[str, Any]:
     """
     Calls the configured LLM provider as a judge.
     Reads provider config from .env via llm_provider.
+
+    `max_tokens` is now honoured per call. It was previously accepted and
+    discarded, so all four call sites -- which pass 500, 1000, 1200 and 2000 --
+    silently shared one budget. That matters in both directions: claim
+    extraction over a long menu was truncated at the judge's default, and a 1-5
+    score reserved thousands of tokens it never used, against a provider that
+    bills the reservation rather than the completion.
     """
     from llm_provider import get_judge_llm
     from langchain_core.messages import HumanMessage
 
-    llm, _ = get_judge_llm()  # Judge uses a different model than generator
+    # Built once. A fresh client per call constructed a new HTTP session for
+    # every one of the four calls made per profile.
+    if "llm" not in _judge_llm_cache:
+        _judge_llm_cache["llm"], _ = get_judge_llm()  # different model from generator
+    llm = _judge_llm_cache["llm"].bind(max_tokens=max_tokens)
+
+    raw = ""
     try:
         response = llm.invoke([HumanMessage(content=prompt)])
-        raw = response.content.strip()
+        raw = (response.content or "").strip()
         if raw.startswith("```"):
             raw = raw.strip("`")
             if raw.startswith("json"):
@@ -172,45 +193,43 @@ def llm_judge_holistic(
 # ── Orchestration ─────────────────────────────────────────────────────────────
 
 def evaluate_generation_for_profile(profile: ChildProfile) -> Dict[str, Any]:
-    retrieval_result = run_retrieval(profile)
-    if not retrieval_result["safe_candidates"]:
+    state = run_pipeline(profile)
+    safe_candidates = [c.get("raw_recipe", {}) for c in (state.get("generation_candidates") or [])]
+    if not safe_candidates:
         return {
             "error": "No safe candidates for this profile.",
             "profile_age": profile.age_years,
         }
 
-    gen_output = generate_menus(
-        profile,
-        retrieval_result["safe_candidates"],
-        retrieval_result["supporting_context"],
-    )
-    if gen_output.get("generation_error"):
-        return {"error": gen_output["generation_error"], "profile_age": profile.age_years}
-    if not gen_output.get("menu_options"):
-        return {"error": "Generation produced zero menu options.", "profile_age": profile.age_years}
+    if state.get("generation_error"):
+        return {"error": state["generation_error"], "profile_age": profile.age_years}
+    # Scored on menus that cleared the post-filter, not on raw proposals: the
+    # post-filter is part of the system under evaluation, so judging its rejects
+    # would score output the system never emits.
+    menus = state.get("final_menus") or []
+    if not menus:
+        return {"error": "Generation produced zero surviving menu options.",
+                "profile_age": profile.age_years}
 
-    menu = gen_output["menu_options"][0]
+    menu = menus[0]
+    context_chunks = supporting_context(state.get("query", ""))
     generated_text = (
         f"{menu.get('why_it_fits', '')} "
         f"{menu.get('nutritional_rationale', '')} "
         f"Allergens confirmed absent: {', '.join(menu.get('allergens_confirmed_absent', []))}."
     )
 
-    faithfulness = compute_faithfulness(
-        generated_text,
-        retrieval_result["supporting_context"],
-        retrieval_result["safe_candidates"],
-    )
+    faithfulness = compute_faithfulness(generated_text, context_chunks, safe_candidates)
     relevancy = compute_answer_relevancy(profile, menu)
     holistic = llm_judge_holistic(
         profile,
         menu,
-        [r["name"] for r in retrieval_result["safe_candidates"]],
+        [r.get("name", "?") for r in safe_candidates],
     )
 
     return {
         "profile_age": profile.age_years,
-        "query": retrieval_result["query"],
+        "query": state.get("query", ""),
         "generated_menu": menu,
         "faithfulness": faithfulness,
         "answer_relevancy": relevancy,

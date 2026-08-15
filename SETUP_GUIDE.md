@@ -214,22 +214,31 @@ without an API key.
 ## Safety tests (no API key needed)
 
 ```bash
-python3 src/test_pipeline_with_mock_llm.py
+python3 -m pytest tests/ -q
 ```
 
-Four integration tests that prove the guardrail safety net catches a deliberately
-misbehaving mock LLM. Tests:
-1. Well-behaved LLM → recommendation passes through ✅
-2. LLM proposes an allergen-containing recipe → caught by post-filter ✅
-3. LLM hallucinates a recipe_id not in the database → rejected ✅
-4. Zero safe candidates → LLM is never called at all ✅
+The whole suite runs offline against a mock LLM. The safety-critical parts:
 
-```bash
-python3 eval/test_eval_generation_with_mock.py
-```
+`tests/test_pipeline_integration.py` — end-to-end against the real
+neurosymbolic LangGraph with a deliberately misbehaving mock LLM:
+1. Well-behaved LLM → recommendation passes through
+2. LLM proposes an allergen-containing recipe → caught by the post-filter
+3. LLM claims an allergen is absent that the recipe declares → caught
+4. LLM hallucinates a recipe_id not in the database → rejected
+5. LLM returns a fabricated citation → corrected against the recipe record
+6. Zero safe candidates → the LLM is never called at all
 
-Four plumbing tests for the evaluation pipeline (claim extraction, contradiction
-detection, faithfulness sensitivity, relevancy scoring) — all with mock LLM.
+`tests/test_guardrails.py` — the deterministic gate in isolation, including the
+compound-word traps (`butternut squash` is not milk, `eggplant` is not egg).
+
+`tests/test_judge_metrics.py` — the LLM-as-judge aggregation, including the
+invariant that all three metrics describe the same set of menus.
+
+`tests/test_stats.py` — McNemar p-values against hand-computed exact binomials,
+bootstrap intervals, and paired score differences.
+
+`tests/test_eval_generation.py` — evaluation plumbing (claim extraction,
+contradiction detection, faithfulness sensitivity, relevancy scoring).
 
 ---
 
@@ -327,12 +336,8 @@ lunch_rag/
 │   ├── console.py                UTF-8 stdout (Windows code-page safety)
 │   ├── vector_store.py           ChromaDB wrapper
 │   ├── setup_database.py         Builds ChromaDB + BM25 indexes
-│   ├── generation.py             Original (non-LangGraph) generation
-│   ├── retrieval.py              Original (non-LangGraph) retrieval
-│   ├── post_filter.py            Original (non-LangGraph) post-filter
-│   ├── main.py                   Original pipeline entry point
-│   ├── cli.py                    Interactive CLI
-│   └── test_pipeline_with_mock_llm.py   4 safety integration tests
+│   ├── main.py                   Pipeline entry point (drives the LangGraph)
+│   └── cli.py                    Interactive CLI
 │
 ├── benchmark/
 │   ├── benchmark_cases.py        30 cases: standard/multi/adversarial/edge/cultural

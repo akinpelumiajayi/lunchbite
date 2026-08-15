@@ -248,23 +248,29 @@ Neuro-symbolic:
                → LLM cannot claim a recipe is safe when it is not
 ```
 
-The integration tests in `src/test_pipeline_with_mock_llm.py` prove all four
-failure modes the neuro-symbolic system guards against:
+The integration tests in `tests/test_pipeline_integration.py` prove the failure
+modes the neuro-symbolic system guards against. They run against the same
+neurosymbolic LangGraph the benchmark measures, driven by a mock LLM scripted to
+misbehave:
 
 | Test scenario | Result |
 |--------------|--------|
 | Well-behaved LLM picks a safe recipe | Reaches final output ✓ |
 | LLM ignores instructions, proposes an allergen-containing recipe | Caught by post-filter, never reaches output ✓ |
-| LLM hallucinates a recipe_id that doesn't exist | Caught as unverifiable, never reaches output ✓ |
+| LLM claims an allergen absent that the recipe declares present | Caught as a false allergen claim ✓ |
+| LLM hallucinates a recipe_id that doesn't exist | Rejected, never reaches output ✓ |
+| LLM returns a fabricated source citation | Corrected against the recipe record ✓ |
 | Zero safe candidates for this profile | LLM never called; honest "no menus" returned ✓ |
 
-Run with: `python3 src/test_pipeline_with_mock_llm.py` (no API key needed)
+Run with: `python3 -m pytest tests/ -q` (no API key needed)
 
-### B5. Generation quality eval (original Anthropic-backed pipeline)
+### B5. Generation quality eval
 
-The original `eval/eval_generation.py` and `eval/run_full_eval.py` scripts
-evaluate the Anthropic-backed `generation.py` module (not the LangGraph Groq
-pipeline). The methodology is identical to what the benchmark evaluator uses:
+`eval/eval_generation.py` and `eval/run_full_eval.py` score generation quality on
+the neurosymbolic LangGraph, via `main.run_pipeline` — the same pipeline as the
+benchmark and the CLI. (They previously drove a separate, drifted implementation,
+so their scores did not describe the system reported on elsewhere in this
+document.) The methodology matches the benchmark evaluator's:
 faithfulness via claim extraction + context verification, relevancy rating,
 and holistic LLM-as-judge rubric scoring. These scripts require
 `GROQ_API_KEY` or Ollama:

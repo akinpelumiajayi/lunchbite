@@ -6,13 +6,18 @@ violations. Reporting 0.333 vs 0.000 from a single pass states no uncertainty:
 the generator runs at temperature 0.1, so the same case can come out differently
 on a second pass, and 30 cases is a small sample.
 
-Two things fix that, and they answer different questions:
+Four things fix that, and they answer different questions:
 
   repeat variance   -- run every case N times and report mean +/- SD. Answers
                        "how stable is this number across identical runs?"
   McNemar's test    -- a paired test on the per-case binary safety outcome.
                        Answers "is the difference between two arms bigger than
                        chance, given they were scored on the same cases?"
+  bootstrap CI      -- an interval around a judge-score mean. Answers "how
+                       precisely is this mean pinned down by n menus?"
+  paired score diff -- the same pairing logic applied to judge scores rather
+                       than the binary outcome. Answers "does the symbolic layer
+                       change the score for the same child?"
 
 McNemar is the right test here specifically because the arms are *paired* — every
 pipeline sees an identical case list, so an unpaired test (chi-square on two
@@ -26,6 +31,7 @@ No new dependencies: the exact binomial p-value is computed with math.comb.
 from __future__ import annotations
 
 import math
+import random
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 ALL_PIPELINE_MODES = ["no_llm", "neural_rag", "neurosymbolic", "no_rag"]
@@ -126,6 +132,80 @@ def _mean_sd(xs: Sequence[float]) -> Tuple[Optional[float], Optional[float]]:
         return round(m, 4), None
     var = sum((x - m) ** 2 for x in xs) / (len(xs) - 1)   # sample SD
     return round(m, 4), round(math.sqrt(var), 4)
+
+
+def bootstrap_ci(xs: Sequence[float], confidence: float = 0.95,
+                 n_boot: int = 2000, seed: int = 20260815) -> Dict[str, Any]:
+    """
+    Percentile bootstrap CI for a mean.
+
+    Bootstrap rather than a t-interval because these are 1-5 ordinal judge scores
+    and 0-1 faithfulness ratios over n=20-30 — bounded, discrete, and visibly
+    non-normal, which is exactly where the normal approximation puts a CI bound
+    outside the scale's own range. The seed is fixed so the reported interval is
+    reproducible; no scipy/numpy needed.
+    """
+    xs = list(xs)
+    n = len(xs)
+    if n == 0:
+        return {"mean": None, "lo": None, "hi": None, "n": 0}
+    mean = sum(xs) / n
+    if n < 3:
+        # An interval from one or two points is not information.
+        return {"mean": round(mean, 3), "lo": None, "hi": None, "n": n,
+                "note": "n<3, no interval"}
+
+    rng = random.Random(seed)
+    means = []
+    for _ in range(n_boot):
+        means.append(sum(xs[rng.randrange(n)] for _ in range(n)) / n)
+    means.sort()
+    alpha = (1.0 - confidence) / 2.0
+    lo = means[int(alpha * n_boot)]
+    hi = means[min(n_boot - 1, int((1.0 - alpha) * n_boot))]
+    return {"mean": round(mean, 3), "lo": round(lo, 3), "hi": round(hi, 3), "n": n}
+
+
+def paired_score_diff(records: List[Dict[str, Any]], mode_a: str, mode_b: str,
+                      metric: str) -> Dict[str, Any]:
+    """
+    Paired difference (a - b) in a judge metric, over cases both arms scored.
+
+    Comparing two independent means answers "are these two numbers different?".
+    Pairing on case_id answers the question actually being asked — "does swapping
+    the symbolic layer in change the score *for the same child*?" — and removes
+    between-case variance, which here is the dominant term: some profiles are
+    simply easier to serve well than others.
+
+    A CI spanning 0 is the evidence for "no meaningful difference". That is a
+    real result and much stronger than the report's previous rule of thumb, which
+    declared no degradation whenever two unpaired means fell within 0.2.
+    """
+    def by_case(mode: str) -> Dict[Tuple[Any, Any], float]:
+        out: Dict[Tuple[Any, Any], float] = {}
+        for rec in records:
+            if rec.get("mode") != mode:
+                continue
+            v = rec.get(metric)
+            if v is None:
+                continue
+            out[(rec.get("case_id"), rec.get("repeat"))] = float(v)
+        return out
+
+    a, b = by_case(mode_a), by_case(mode_b)
+    shared = sorted(set(a) & set(b), key=lambda k: (str(k[0]), str(k[1])))
+    diffs = [a[k] - b[k] for k in shared]
+    ci = bootstrap_ci(diffs)
+    return {
+        "mode_a": mode_a, "mode_b": mode_b, "metric": metric,
+        "n_pairs": len(diffs),
+        "mean_diff": ci["mean"], "lo": ci["lo"], "hi": ci["hi"],
+        # None (rather than False) when there are too few pairs to bound the
+        # difference at all — "not shown to differ" and "shown not to differ"
+        # are different findings and must not collapse into one flag.
+        "excludes_zero": (None if ci["lo"] is None
+                          else bool(ci["lo"] > 0 or ci["hi"] < 0)),
+    }
 
 
 def repeat_variance(results: List[Dict[str, Any]], metric_fn) -> Dict[str, Any]:

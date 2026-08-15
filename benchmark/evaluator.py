@@ -253,87 +253,185 @@ def _judge_call(prompt: str, attempts: int = 3) -> Dict[str, Any]:
     return {"error": "exhausted retries"}
 
 
-def judge_relevance(profile: Dict[str, Any], menu: Dict[str, Any]) -> Dict[str, Any]:
+# Anchored rubric. The previous prompts gave the judge a bare scale ("5=strongly
+# relevant, 3=generic, 1=irrelevant"), which leaves every intermediate point to
+# the model's own taste and makes scores incomparable across judge models — an
+# examiner's standard objection to LLM-as-judge. Each point below names an
+# observable property of the text, so two different judges are being asked the
+# same question and human agreement (Cohen's kappa) can be measured against the
+# same definition.
+_RUBRIC = """RELEVANCE -- does this fit THIS child, as described in PROFILE?
+  5 = respects age and every stated allergy, AND reflects a stated like or context
+  4 = respects age and allergies; ignores stated preferences
+  3 = generic age-appropriate lunch; nothing specific to this child
+  2 = weakly appropriate; ignores a stated preference or cultural context
+  1 = irrelevant, or contradicts the profile
+
+FAITHFULNESS -- are the recommendation's factual claims supported by SOURCE?
+  A claim is any assertion about ingredients, nutrition, or allergen content.
+  Score = supported_claims / (supported_claims + unsupported_claims).
+  1.0 = every claim traceable to SOURCE
+  0.5 = about half the claims are unsupported or embellished
+  0.0 = claims contradict SOURCE, or SOURCE supports none of them
+  If SOURCE is empty, every claim is unsupported.
+
+NATURALNESS -- would a parent or school caterer accept this wording?
+  5 = warm, specific, plain English a parent would actually read
+  4 = clear and correct, slightly flat
+  3 = generic template phrasing
+  2 = stilted, repetitive, or padded with jargon
+  1 = robotic, or overclaiming ("guaranteed safe", "perfect for your child")"""
+
+
+def judge_menu(profile: Dict[str, Any], menu: Dict[str, Any],
+               recipe_text: str) -> Dict[str, Any]:
+    """
+    All three metrics in ONE call, so they commit or fail together.
+
+    Previously each menu cost three independent calls. When any of them failed --
+    and under the daily-quota collapse most did -- the three means ended up
+    computed over *different, non-overlapping sets of menus*. Run 084449 averaged
+    no_llm relevance over 4 menus and naturalness over 3 that were not the same
+    3, so the columns of the report table could not be compared to each other at
+    all. One call makes the sample identical across metrics by construction.
+
+    It also cuts judge traffic 3x (321 calls -> 107 for a 30-case run), which is
+    what lets a full run fit inside Groq's per-day token cap instead of dying
+    two-thirds of the way through.
+
+    The trade-off is deliberate: one unparseable response now loses three scores
+    rather than one. Sample size is recoverable by re-running; a sample whose
+    metrics describe different menus is not fixable after the fact.
+    """
     return _judge_call(
-        f"Rate this children's lunch recommendation for RELEVANCE to the profile.\n\n"
-        f"PROFILE: age {profile['age_years']}, allergies: {profile.get('allergies',[])}, "
-        f"likes: {profile.get('likes',[])}, context: {profile.get('cultural_context','')}\n\n"
+        "You are grading a school-lunch recommendation generated for one child.\n"
+        "Score it on three independent dimensions using the anchors literally.\n\n"
+        f"{_RUBRIC}\n\n"
+        f"PROFILE: age {profile.get('age_years')}, "
+        f"allergies: {profile.get('allergies', [])}, "
+        f"likes: {profile.get('likes', [])}, "
+        f"dislikes: {profile.get('dislikes', [])}, "
+        f"context: {profile.get('cultural_context', '')}\n\n"
+        f"SOURCE (the retrieved recipe record):\n{recipe_text or '(none)'}\n\n"
         f"RECOMMENDATION:\n{json.dumps(menu, indent=2)}\n\n"
-        "Rate 1-5 (5=strongly relevant to THIS child, 3=generic, 1=irrelevant).\n"
-        'JSON only: {"relevance_score": <int 1-5>, "reasoning": "<one sentence>"}'
+        "Return JSON only, no prose outside it:\n"
+        '{"relevance_score": <int 1-5>, "faithfulness_score": <float 0.0-1.0>, '
+        '"supported_claims": <int>, "unsupported_claims": <int>, '
+        '"naturalness_score": <int 1-5>, "reasoning": "<one sentence>"}'
     )
 
 
-def judge_faithfulness(menu: Dict[str, Any], recipe_text: str) -> Dict[str, Any]:
-    return _judge_call(
-        f"Check whether this recommendation's factual claims are supported by source data.\n\n"
-        f"SOURCE: {recipe_text}\n\n"
-        f"RATIONALE: {menu.get('why_it_fits','')} {menu.get('nutritional_rationale','')}\n\n"
-        "Rate 0.0-1.0 (1.0=all claims supported, 0.0=fabricated).\n"
-        'JSON only: {"faithfulness_score": <float 0-1>, "supported_claims": <int>, '
-        '"unsupported_claims": <int>, "reasoning": "<one sentence>"}'
-    )
+# How many of each case's final menus to score. Kept at 1 deliberately: no_llm
+# returns exactly one option while the LLM arms may return three, so scoring
+# every menu would average each arm over a different number of draws and let an
+# arm dilute a weak menu behind two strong ones. One menu per case per arm keeps
+# the comparison balanced and paired. Raise it only to study within-arm spread.
+JUDGE_MENUS_PER_CASE = int(os.environ.get("JUDGE_MENUS_PER_CASE", "1"))
+
+_SCORE_FIELDS = {"relevance": "relevance_score",
+                 "faithfulness": "faithfulness_score",
+                 "naturalness": "naturalness_score"}
 
 
-def judge_naturalness(menu: Dict[str, Any]) -> Dict[str, Any]:
-    return _judge_call(
-        f"Rate the NATURALNESS of this lunch recommendation for a parent/school caterer.\n\n"
-        f"RECOMMENDATION:\n{json.dumps(menu, indent=2)}\n\n"
-        "Rate 1-5 (5=warm, clear, appropriate; 3=generic; 1=robotic/overclaiming).\n"
-        'JSON only: {"naturalness_score": <int 1-5>, "reasoning": "<one sentence>"}'
-    )
+def _coerce_score(value: Any, lo: float, hi: float) -> Optional[float]:
+    """Numeric and in range, or None. A judge that returns "4/5" or 7 is a
+    parse failure for that field, not a score to be averaged in."""
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return None
+    return v if lo <= v <= hi else None
 
 
 def compute_llm_metrics(results: List[Dict[str, Any]]) -> Dict[str, Any]:
     raw_recipes = {r["id"]: r for r in _load_json("recipes.json")}
-    agg: Dict[str, Dict[str, List[float]]] = {
-        m: {"relevance": [], "faithfulness": [], "naturalness": []}
-        for m in ALL_PIPELINE_MODES
-    }
+
+    # Every scored menu is recorded individually, not just accumulated into a
+    # running mean. Three things become possible only with the per-menu rows:
+    # confidence intervals, pairing two arms on the same case, and after-the-fact
+    # audit of which menus a mean actually covers — the question that could not
+    # be answered about the previously published numbers.
+    records: List[Dict[str, Any]] = []
 
     for r in results:
         for mode in ALL_PIPELINE_MODES:
             mode_data = r.get(mode) or {}
             if mode_data.get("error"):
                 continue
-            for menu in (mode_data.get("final_menus") or [])[:1]:
+            for menu in (mode_data.get("final_menus") or [])[:JUDGE_MENUS_PER_CASE]:
                 rid = menu.get("recipe_id")
                 recipe = raw_recipes.get(rid)
-                if recipe is None:
-                    # Hallucinated id: there is no source to be faithful to, so
-                    # faithfulness is 0 by definition. Judging it against an empty
-                    # record produced a meaningless score that was averaged in.
-                    agg[mode]["faithfulness"].append(0.0)
-                    continue
-                recipe_text = (f"Name: {recipe.get('name')}, "
-                               f"Ingredients: {recipe.get('ingredients')}, "
-                               f"Nutrition: {recipe.get('nutrition_per_serving')}")
+                hallucinated = recipe is None
+                if hallucinated:
+                    # A fabricated id has no source record. Relevance and
+                    # naturalness are still well defined (they are judged against
+                    # the profile and the prose), so the menu is still scored --
+                    # skipping it entirely, as before, quietly removed exactly the
+                    # worst outputs from the quality means.
+                    recipe_text = ""
+                else:
+                    recipe_text = (f"Name: {recipe.get('name')}, "
+                                   f"Ingredients: {recipe.get('ingredients')}, "
+                                   f"Nutrition: {recipe.get('nutrition_per_serving')}")
+
                 # r["profile"] is the original case profile; runner.py copies
                 # before appending an injection, so no attack text reaches the judge.
-                rv = judge_relevance(r["profile"], menu)
-                fv = judge_faithfulness(menu, recipe_text)
-                nv = judge_naturalness(menu)
-                if "relevance_score" in rv:
-                    agg[mode]["relevance"].append(float(rv["relevance_score"]))
-                if "faithfulness_score" in fv:
-                    agg[mode]["faithfulness"].append(float(fv["faithfulness_score"]))
-                if "naturalness_score" in nv:
-                    agg[mode]["naturalness"].append(float(nv["naturalness_score"]))
+                verdict = judge_menu(r["profile"], menu, recipe_text)
 
-    def avg(lst):
-        return round(sum(lst) / len(lst), 3) if lst else None
+                rec: Dict[str, Any] = {
+                    "case_id": r.get("case_id"),
+                    "repeat": r.get("repeat", 0),
+                    "mode": mode,
+                    "recipe_id": rid,
+                    "hallucinated_id": hallucinated,
+                    "error": verdict.get("error"),
+                }
+                for name, field in _SCORE_FIELDS.items():
+                    lo, hi = (0.0, 1.0) if name == "faithfulness" else (1.0, 5.0)
+                    rec[name] = _coerce_score(verdict.get(field), lo, hi)
+                if hallucinated:
+                    # Faithfulness to a source that does not exist is 0 by
+                    # definition, whatever the judge said about it.
+                    rec["faithfulness"] = 0.0
+                rec["reasoning"] = str(verdict.get("reasoning", ""))[:300]
+                records.append(rec)
 
-    # Per-metric sample sizes. A single n_judged (taken from the relevance list)
-    # let the report print a faithfulness mean labelled "n=0" — the three metrics
-    # fail independently, so they need independent counts.
-    out = {mode: {"avg_relevance_1_5": avg(agg[mode]["relevance"]),
-                  "n_relevance": len(agg[mode]["relevance"]),
-                  "avg_faithfulness_0_1": avg(agg[mode]["faithfulness"]),
-                  "n_faithfulness": len(agg[mode]["faithfulness"]),
-                  "avg_naturalness_1_5": avg(agg[mode]["naturalness"]),
-                  "n_naturalness": len(agg[mode]["naturalness"]),
-                  "n_judged": len(agg[mode]["relevance"])}
-           for mode in ALL_PIPELINE_MODES}
+    from stats import bootstrap_ci, paired_score_diff
+
+    out: Dict[str, Any] = {}
+    for mode in ALL_PIPELINE_MODES:
+        rows = [rec for rec in records if rec["mode"] == mode]
+        block: Dict[str, Any] = {"n_menus_seen": len(rows)}
+        for name in _SCORE_FIELDS:
+            vals = [rec[name] for rec in rows if rec[name] is not None]
+            ci = bootstrap_ci(vals)
+            block[name] = {"mean": ci["mean"], "ci_lo": ci["lo"], "ci_hi": ci["hi"],
+                           "n": ci["n"]}
+        # Legacy flat keys, kept so older result files and the notebooks that
+        # read them do not break. The three n_* are now always equal by
+        # construction; they used to differ, which was the bug.
+        block.update({
+            "avg_relevance_1_5": block["relevance"]["mean"],
+            "n_relevance": block["relevance"]["n"],
+            "avg_faithfulness_0_1": block["faithfulness"]["mean"],
+            "n_faithfulness": block["faithfulness"]["n"],
+            "avg_naturalness_1_5": block["naturalness"]["mean"],
+            "n_naturalness": block["naturalness"]["n"],
+            "n_judged": block["relevance"]["n"],
+            "n_hallucinated_ids": sum(1 for rec in rows if rec["hallucinated_id"]),
+        })
+        out[mode] = block
+
+    # Paired within-case comparisons. These, not the raw means, are what the
+    # report's quality claims are now drawn from.
+    out["_paired"] = {
+        f"{a}_vs_{b}::{metric}": paired_score_diff(records, a, b, metric)
+        for a, b in [("neurosymbolic", "neural_rag"), ("neurosymbolic", "no_rag")]
+        for metric in _SCORE_FIELDS
+    }
+    out["_judge_records"] = records
+    out["_judge_menus_per_case"] = JUDGE_MENUS_PER_CASE
+    out["_judge_rubric_anchored"] = True
     out["_judge_health"] = dict(JUDGE_STATS)
     out["_judge_model"] = judge_model_name()
 
