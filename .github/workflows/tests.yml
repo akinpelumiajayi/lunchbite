@@ -1,0 +1,58 @@
+name: tests
+
+# The guardrail is the safety-critical module in this repository, and the
+# benchmark harness is what the research claims rest on. Both are pure Python
+# with no network dependency, so every push can afford to prove they still hold.
+#
+# No API key is configured here on purpose: nothing in this workflow may call a
+# live LLM. Safety metrics, retrieval maths, judge aggregation and the report's
+# claim logic are all deterministic and testable offline — if a test starts
+# needing a key, that test has stopped being reproducible.
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.lock.txt
+
+      - name: Install pinned dependencies
+        # The lock file, not requirements.txt: CI should fail when the exact
+        # versions a published result was produced with stop working, rather
+        # than silently drifting onto newer ones.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock.txt
+          pip install pytest
+
+      - name: Run test suite
+        env:
+          # Keep the suite honest about being offline. Any test that reaches for
+          # a provider fails here instead of quietly skipping.
+          GROQ_API_KEY: ""
+          LANGCHAIN_TRACING_V2: "false"
+          TOKENIZERS_PARALLELISM: "false"
+        run: pytest -q
+
+      - name: Check the report generator runs on a mock benchmark
+        # End-to-end smoke test of the harness with the mock LLM: no key needed,
+        # and it exercises setup_database -> runner -> evaluator ->
+        # generate_report together, which the unit tests do not. Not
+        # --skip-setup: vectordb/ is generated output and absent from a fresh
+        # checkout, so the index has to be built here.
+        env:
+          TOKENIZERS_PARALLELISM: "false"
+        run: python run_all.py --mock

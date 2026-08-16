@@ -231,10 +231,25 @@ def repeat_variance(results: List[Dict[str, Any]], metric_fn) -> Dict[str, Any]:
     out: Dict[str, Any] = {"n_repeats": len(by_repeat)}
     for mode in ALL_PIPELINE_MODES:
         block: Dict[str, Any] = {}
+        # A repeat in which every run of this mode failed contributes no
+        # evidence about the mode, only about the API. Its rates are all 0.0 by
+        # construction (0 violations over an empty denominator), and averaging
+        # those in pulls the mean toward zero — i.e. makes an arm look *safer*
+        # the more of it died. Run 20260816_182449 lost repeats 4 and 5 of
+        # neural_rag to the daily token cap and reported violations of
+        # [0.367, 0.367, 0.625, 0.000, 0.000], mean 0.272, on that basis.
+        present = {rep: m for rep, m in per_repeat.items() if mode in m}
+        # Default 1, not 0: a metric_fn that does not report cases_evaluated is
+        # unknown, not empty, and must not have every repeat silently discarded.
+        scored = {rep: m for rep, m in present.items()
+                  if m[mode].get("cases_evaluated", 1) > 0}
+        dropped = sorted(set(present) - set(scored))
         for key in tracked:
-            vals = [m[mode][key] for m in per_repeat.values()
-                    if mode in m and key in m[mode]]
+            vals = [m[mode][key] for m in scored.values() if key in m[mode]]
             mean, sd = _mean_sd(vals)
             block[key] = {"mean": mean, "sd": sd, "per_repeat": vals}
+        block["n_repeats_scored"] = len(scored)
+        if dropped:
+            block["repeats_dropped_all_runs_failed"] = dropped
         out[mode] = block
     return out

@@ -167,6 +167,38 @@ def test_variance_mean_and_sd_across_repeats():
     assert sorted(vr["per_repeat"]) == [0.0, 1.0]
 
 
+def test_variance_drops_repeats_where_every_run_of_an_arm_failed():
+    """
+    A repeat in which the whole arm was rate-limited scores 0 violations over an
+    empty denominator. Averaging it in makes an arm look *safer* the more of it
+    died — which is exactly what run 20260816_182449 did, reporting neural_rag
+    violations of [0.367, 0.367, 0.625, 0.000, 0.000] after the generator hit
+    its daily token cap on repeats 4 and 5.
+    """
+    rows = [row("C1", repeat=rep, neural_rag="recipe_bad") for rep in range(4)]
+
+    def fake_metrics(rs):
+        rep = rs[0]["repeat"]
+        alive = rep < 2
+        blk = {"allergen_violation_rate": 0.8 if alive else 0.0,
+               "allergen_violation_rate_over_all_cases": 0.8 if alive else 0.0,
+               "coverage": 1.0 if alive else 0.0,
+               "safe_and_useful_rate": 0.2 if alive else 0.0,
+               "cases_evaluated": 30 if alive else 0}
+        return {m: blk for m in ["no_llm", "neural_rag", "neurosymbolic", "no_rag"]}
+
+    out = repeat_variance(rows, fake_metrics)
+    blk = out["neural_rag"]
+    assert blk["n_repeats_scored"] == 2
+    assert blk["repeats_dropped_all_runs_failed"] == [2, 3]
+    vr = blk["allergen_violation_rate"]
+    assert vr["per_repeat"] == [0.8, 0.8]
+    # The mean is the truth about the runs that happened, not diluted to 0.4 by
+    # two repeats that never produced an answer.
+    assert vr["mean"] == pytest.approx(0.8)
+    assert vr["sd"] == pytest.approx(0.0)
+
+
 # ── bootstrap CI ─────────────────────────────────────────────────────────────
 
 def test_bootstrap_ci_brackets_the_mean():

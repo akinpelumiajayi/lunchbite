@@ -59,7 +59,43 @@ pass and are marked as such; the plan text predates them.
 | 4.4 | Injection kept out of judge prompts | already fixed (verified: 0 leaks) |
 | 4.5 | README injection count corrected | done |
 
-**New findings produced by this work** (all reproducible):
+### Second pass — 2026-08-16 (report honesty + judge instrument)
+
+| § | Item | Status |
+|---|---|---|
+| 5.1 | §3.1 verdict gated on all three metrics, not relevance alone | done |
+| 5.2 | Faithfulness rubric v2: allergen fields in SOURCE, absence claims scoreable | done |
+| 5.3 | `--repeats` actually used for the published run | done |
+| 5.4 | `--no-judge` flag; judge scores repeat 0 only by default | done |
+| 5.5 | Arms-not-identical caveat (prompt text differs) in report §1 | done |
+| 5.6 | Pre-filter over-blocking reported as a cost against coverage | done |
+| 5.7 | CI on every push (`.github/workflows/tests.yml`) | done |
+
+**Second-pass findings:**
+
+- **The report contradicted its own table.** §3.1 printed "the symbolic constraint
+  layer does **not** degrade recommendation quality" whenever *relevance* spanned
+  zero — while faithfulness (−0.260 [−0.420, −0.100]) and naturalness
+  (−0.600 [−1.040, −0.120]) both excluded it. The verdict now reads all three and
+  names whichever degraded. Regression-tested against the exact run 20260816_160852
+  numbers in `tests/test_report_claims.py`.
+- **Faithfulness was never measuring faithfulness.** Every `no_llm` (n=22) and
+  `neurosymbolic` (n=25) menu scored exactly 0.000 with a [0.000, 0.000] interval.
+  Cause: `recipe_text` passed to the judge omitted `allergens_present`, so
+  "free from milk" had nothing to check against — and the corpus never records
+  absent allergens, so the commonest claim type in this domain was unverifiable by
+  construction. Menus quoting all four nutrition figures correctly to the decimal
+  still scored 0.0; the judge's own reasoning said "the source does not mention the
+  absence of various allergens". SOURCE now states both allergen lists, the rubric
+  says how to score an absence claim, and process descriptions ("selected by
+  rule-based scoring") are excluded from the claim count. Faithfulness is not
+  comparable across `_judge_rubric_version`.
+- **Over-blocking is the price of the safety result.** Pre-filter precision 0.477
+  means ~104 of 199 rejections were recipes that were safe for that profile. That
+  is what holds neuro-symbolic coverage to 83.3% against neural_rag's 100%, and it
+  is now stated in §2 rather than left implicit across two tables.
+
+**New findings produced by the first pass** (all reproducible):
 
 - **The headline claim is now statistically supported.** McNemar exact test:
   neurosymbolic vs neural_rag **p = 0.00195**, vs no_rag **p = 3.05e-05**, both

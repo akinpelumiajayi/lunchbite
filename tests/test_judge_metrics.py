@@ -98,6 +98,97 @@ def test_one_call_per_menu_not_three():
     assert calls["n"] == 10          # 5 cases x 2 arms x 1 call
 
 
+class TestRunFailedClassification:
+    """
+    A dead arm must not be able to report a perfect safety record.
+
+    In run 20260816_182449 the generator hit its daily token cap during repeat 3.
+    Repeats 4 and 5 produced zero menus across all 30 cases, and neural_rag
+    reported violation rates of [0.367, 0.367, 0.625, 0.000, 0.000] — two-fifths
+    of the mean contributed by an arm that was switched off. The guard tested
+    `error`, which is set only when the graph raises; an LLM failure is caught
+    inside the generate node and surfaces as `generation_error`.
+    """
+
+    def test_rate_limited_call_is_a_failure(self):
+        md = {"generation_error": "LLM call failed: RateLimitError: Error code: 429",
+              "generation_candidates": ["recipe_001"], "final_menus": []}
+        assert evaluator.run_failed(md, "neural_rag") is True
+
+    def test_unparseable_output_is_a_failure(self):
+        md = {"generation_error": "Could not parse LLM response: no JSON object",
+              "generation_candidates": ["recipe_001"], "final_menus": []}
+        assert evaluator.run_failed(md, "neurosymbolic") is True
+
+    def test_graph_exception_is_a_failure(self):
+        assert evaluator.run_failed({"error": "KeyError: 'id'"}, "neural_rag") is True
+
+    def test_prefilter_removing_everything_is_a_result_not_a_failure(self):
+        """The zero-safe-candidate cases (MUL-03, MUL-04) are the system working."""
+        md = {"generation_error": "No candidates available for generation.",
+              "generation_candidates": [], "final_menus": []}
+        assert evaluator.run_failed(md, "neurosymbolic") is False
+
+    def test_no_rag_emptiness_carries_no_information(self):
+        """no_rag has no candidates by design, so empty candidates cannot excuse
+        a generation error there."""
+        md = {"generation_error": "LLM call failed: RateLimitError",
+              "generation_candidates": [], "final_menus": []}
+        assert evaluator.run_failed(md, "no_rag") is True
+
+    def test_healthy_run_is_not_a_failure(self):
+        md = {"generation_error": None, "generation_candidates": ["recipe_001"],
+              "final_menus": [{"recipe_id": "recipe_001"}]}
+        assert evaluator.run_failed(md, "neural_rag") is False
+
+    def test_dead_arm_does_not_score_a_clean_violation_rate(self):
+        """End to end: an arm whose every call was rate-limited must report its
+        cases as errored rather than as a flawless 0.000."""
+        rows = []
+        for i in range(10):
+            rows.append({
+                "case_id": f"C{i}", "profile": PROFILE, "repeat": 0,
+                "expected_unsafe_ids": ["recipe_001"],
+                "neural_rag": {"generation_error": "LLM call failed: RateLimitError",
+                               "generation_candidates": ["recipe_001"],
+                               "final_menus": [], "proposed_menus": []},
+            })
+        m = evaluator.compute_safety_metrics(rows)["neural_rag"]
+        assert m["cases_errored"] == 10
+        assert m["cases_evaluated"] == 0
+        # The rate is still 0.000 arithmetically, but the denominator is now
+        # visibly empty instead of silently standing in for a real result.
+        assert m["coverage"] == 0.0
+
+
+def test_only_the_first_repeat_is_judged_by_default():
+    """
+    --repeats puts uncertainty on the safety rates; it must not multiply judge
+    traffic by --repeats as well. At 5 repeats that is the difference between
+    fitting inside the daily token cap and collapsing partway through it.
+    """
+    rows = [case(f"C{i}", modes={"neural_rag": REAL_ID}, repeat=rep)
+            for rep in range(5) for i in range(4)]
+    with pytest.MonkeyPatch.context() as mp:
+        calls = stub_judge(mp, [verdict()])
+        out = evaluator.compute_llm_metrics(rows)
+    assert calls["n"] == 4                          # 4 cases, repeat 0 only
+    assert out["neural_rag"]["relevance"]["n"] == 4
+    assert out["_judge_all_repeats"] is False
+
+
+def test_judge_all_repeats_opt_in_scores_every_repeat(monkeypatch):
+    """The knob has to actually work, or the within-arm spread it exists for
+    is unreachable."""
+    monkeypatch.setattr(evaluator, "JUDGE_ALL_REPEATS", True)
+    rows = [case(f"C{i}", modes={"neural_rag": REAL_ID}, repeat=rep)
+            for rep in range(3) for i in range(4)]
+    calls = stub_judge(monkeypatch, [verdict()])
+    out = evaluator.compute_llm_metrics(rows)
+    assert calls["n"] == 12
+    assert out["neural_rag"]["relevance"]["n"] == 12
+
+
 def test_a_failed_call_drops_all_three_scores_together():
     """The deliberate trade-off: losing a menu entirely is acceptable, losing it
     from one metric only is not."""

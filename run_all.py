@@ -202,12 +202,12 @@ def _run_mock_benchmark(repeats: int = 1) -> str:
     return out_path
 
 
-def step_evaluate(results_path: str) -> str:
+def step_evaluate(results_path: str, run_judge: Optional[bool] = None) -> str:
     print("\n" + "=" * 60)
     print("STEP 3: Computing evaluation metrics (Aim 5)")
     print("=" * 60)
     from evaluator import evaluate
-    scores = evaluate(results_path)
+    scores = evaluate(results_path, run_llm_judge=run_judge)
     out_path = results_path.replace(".json", "_eval.json")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(scores, f, indent=2)
@@ -277,6 +277,13 @@ def main() -> None:
     parser.add_argument("--repeats", type=int, default=1,
                         help="Runs per case per pipeline. >1 reports mean +/- SD "
                              "alongside the paired significance test. Try 5.")
+    parser.add_argument("--no-judge", action="store_true",
+                        help="Skip LLM-as-judge scoring. Safety metrics, significance "
+                             "and retrieval metrics are all deterministic and still "
+                             "computed. Pair with --repeats: repeats exist to put "
+                             "uncertainty on the safety rates, and judging every "
+                             "repeat multiplies judge spend by --repeats for no gain "
+                             "on that question.")
     # No --groq-key / --langsmith-key: a key passed on the command line is
     # recorded in shell history and is visible to any other user via the process
     # table for the lifetime of the run. Keys belong in .env, which is gitignored.
@@ -312,7 +319,7 @@ def main() -> None:
         results_path = step_benchmark(provider=args.provider, use_mock=args.mock,
                                       model_override=args.model, repeats=args.repeats)
 
-    eval_path = step_evaluate(results_path)
+    eval_path = step_evaluate(results_path, run_judge=False if args.no_judge else None)
     retrieval_path = step_retrieval_eval()
     report_path = step_report(results_path, eval_path, retrieval_path)
 

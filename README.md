@@ -57,6 +57,14 @@ python3 run_all.py --mock
 # 4. Run with live LLM (auto-detects Groq or Ollama from .env)
 python3 run_all.py
 
+# 4b. Repeat every case to put run-to-run uncertainty on the safety rates.
+#     The generator runs at non-zero temperature, so a single pass reports
+#     rates with no spread behind them. Quality scoring stays on the first
+#     repeat (set JUDGE_ALL_REPEATS=true to score all of them), so judge
+#     spend does not multiply by --repeats.
+python3 run_all.py --repeats 5
+python3 run_all.py --repeats 5 --no-judge   # safety + retrieval only, no judge quota used
+
 # 5. Open the Jupyter notebook walkthrough
 jupyter notebook notebooks/lunch_rag_pipeline.ipynb
 ```
@@ -455,15 +463,31 @@ Judge outcomes are recorded in `_judge_health` (`attempted` / `ok` / `parse_erro
 `call_error`) in the eval JSON. Judge failures used to be swallowed, so the means
 were computed over whatever survived — check this before citing the scores.
 
+**Rubric v2 (2026-08-16).** Faithfulness in runs before this date reads at or near
+0.000 for every arm. That was an instrument fault, not a result: the SOURCE record
+handed to the judge omitted the recipe's allergen fields, so *"free from milk"* —
+the commonest claim in this domain — had nothing to be verified against and was
+counted unsupported by construction. The judge said as much in its own reasoning
+(*"the source does not mention the absence of various allergens"*), and menus whose
+every nutrition figure matched the corpus to the decimal still scored 0.0.
+`evaluator.source_text()` now states the present **and** absent allergen lists, and
+the rubric says how to score an absence claim and to ignore process descriptions
+("selected by rule-based scoring"). The eval JSON records `_judge_rubric_version`;
+do not pool faithfulness across versions.
+
 ---
 
 ## Tests
 
 ```bash
-pytest                     # 55 tests, all deterministic, no API key needed
+pytest                     # 158 tests, all deterministic, no API key needed
 python eval/check_data_quality.py   # nutrition plausibility checks on the corpus
 python eval/eval_negation.py        # can retrieval honour allergen negation?
 ```
+
+CI runs the same suite plus an end-to-end `--mock` run on every push
+(`.github/workflows/tests.yml`). No API key is configured there on purpose: if a
+test starts needing a live provider, it has stopped being reproducible.
 
 `tests/test_guardrails.py` covers the safety-critical module in both directions:
 false positives (safe food wrongly rejected — `butternut squash`, `coconut milk`,

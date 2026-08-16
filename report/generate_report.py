@@ -67,6 +67,82 @@ def _delta(a: Optional[float], b: Optional[float], invert: bool = False) -> str:
 
 # ── Main report function ──────────────────────────────────────────────────────
 
+QUALITY_METRICS = ("relevance", "faithfulness", "naturalness")
+
+
+def _join_names(names: List[str]) -> str:
+    if len(names) <= 1:
+        return "".join(names)
+    return ", ".join(names[:-1]) + " and " + names[-1]
+
+
+def quality_verdict(paired: Dict[str, Any],
+                    a: str = "neurosymbolic", b: str = "neural_rag") -> str:
+    """
+    The §3.1 prose summary of the paired quality comparison.
+
+    Drawn from all three metrics, not from relevance alone. Gating it on
+    relevance was how the generator came to print "the symbolic constraint layer
+    does **not** degrade recommendation quality" directly beneath a table
+    showing faithfulness at -0.260 [-0.420, -0.100] and naturalness at
+    -0.600 [-1.040, -0.120] — both intervals excluding zero. The claim
+    contradicted its own evidence one line further up the page.
+
+    A metric counts as degraded/improved only when its interval excludes zero;
+    an unbounded metric (too few pairs to bootstrap) is left out of the verdict
+    rather than silently treated as agreement.
+    """
+    degraded, improved, flat = [], [], []
+    for metric in QUALITY_METRICS:
+        d = paired.get(f"{a}_vs_{b}::{metric}") or {}
+        if not d.get("n_pairs") or d.get("lo") is None:
+            continue
+        if not d.get("excludes_zero"):
+            flat.append(metric)
+        elif (d.get("mean_diff") or 0) < 0:
+            degraded.append(metric)
+        else:
+            improved.append(metric)
+
+    if not (degraded or improved or flat):
+        return ("> No verdict is drawn: none of the three metrics had enough paired "
+                "scores to bound a confidence interval.")
+
+    if degraded:
+        verb = "is" if len(degraded) == 1 else "are"
+        para = (f"**{_join_names(degraded).capitalize()} {verb} measurably lower under "
+                "the symbolic layer.**")
+        if improved:
+            rose = "is" if len(improved) == 1 else "are"
+            para += f" {_join_names(improved).capitalize()} {rose} higher."
+        if flat:
+            held = "spans" if len(flat) == 1 else "span"
+            para += (f" The interval for {_join_names(flat)} {held} zero, so no difference "
+                     "is detected there.")
+        return para + (
+            " Some loss is the expected cost of pre-filtering the candidate pool — the "
+            "LLM is choosing from a smaller set, and in this domain a slightly weaker "
+            "safe recommendation is preferable to a strong unsafe one. But the trade-off "
+            "is real on the metrics named above, and is reported here as a cost rather "
+            "than described as free."
+        )
+
+    if improved:
+        rose = "is" if len(improved) == 1 else "are"
+        para = f"**{_join_names(improved).capitalize()} {rose} higher under the symbolic layer.**"
+        if flat:
+            held = "spans" if len(flat) == 1 else "span"
+            para += (f" The interval for {_join_names(flat)} {held} zero.")
+        return para + (" No metric is measurably worse, so the safety gain in §2 is not "
+                       "purchased with worse recommendations.")
+
+    return ("Every interval above spans zero: across "
+            f"{_join_names(list(flat))} alike, no quality difference is detected between "
+            "the two arms. That is the evidence for the claim that the symbolic constraint "
+            "layer does **not** degrade recommendation quality — the safety gain shown in "
+            "§2 is not purchased with worse recommendations.")
+
+
 def generate_report(
     results_path: str,
     eval_path: Optional[str] = None,
@@ -206,9 +282,18 @@ def generate_report(
          "> **Caveat:** this run's metadata does not record which arms received the"
          " injection, so the comparison below may not be like-for-like."),
         "",
-        "Because the arms differ only in the symbolic constraint layer, the differences",
-        "reported below are attributable to that layer — subject to the limitations in",
-        "section 8, in particular the single run per condition.",
+        "The arms share a corpus, a retrieval stack and an LLM, so the differences reported",
+        "below are attributable to the symbolic constraint layer — with one caveat that",
+        "should be read alongside them, and the limitations in section 8.",
+        "",
+        "> **The arms are not a perfectly clean contrast.** `neurosymbolic` and `neural_rag`",
+        "> also receive different prompt text: the neuro-symbolic prompt tells the model its",
+        "> candidates were pre-verified safe, while the neural-only prompt asks the model to",
+        "> check allergens itself (`src/graphs/nodes.py`, `constraint_note`). That difference",
+        "> is intrinsic to the design — a pre-filtered pipeline has no honest reason to ask",
+        "> the model to re-derive a guarantee it already holds — but it means the two arms",
+        "> differ by the gates *and* by the instruction, and the §3 quality comparison in",
+        "> particular cannot separate them.",
         "",
         "| Pipeline | Mode | Safety mechanism |",
         "|----------|------|-----------------|",
@@ -256,6 +341,37 @@ def generate_report(
         "",
     ]
 
+    # A failed case-run and a deliberate refusal both end with no menus, so an arm
+    # whose API died reads as an arm that safely declined — the violation rate
+    # divides by the cases answered, and an arm that answered nothing scores
+    # 0.000. Errored runs are excluded from every rate above, but the exclusion
+    # has to be visible or the reader cannot tell how much of the run survived.
+    errored = {m: (safety.get(m) or {}).get("cases_errored", 0) for m in present_modes}
+    if any(errored.values()):
+        attempted = max(((safety.get(m) or {}).get("cases_evaluated", 0) + e)
+                        for m, e in errored.items())
+        worst = max(errored.values())
+        L += [
+            f"> **⚠️ {worst} of {attempted} case-runs failed and are excluded from the rates "
+            "below.** A failed run (rate limit, unparseable output) produces no menus, which "
+            "is indistinguishable from a safe refusal unless it is excluded — so the figures "
+            "here describe only the runs that completed.",
+            ">",
+            "> | Pipeline | Case-runs scored | Failed and excluded |",
+            "> |---|---|---|",
+        ]
+        for m in present_modes:
+            sv = safety.get(m) or {}
+            L.append(f"> | {MODE_LABELS[m]} | {sv.get('cases_evaluated', 0)} | "
+                     f"{sv.get('cases_errored', 0)} |")
+        L += [
+            ">",
+            "> Where the counts differ between arms, the arms are no longer scored on the "
+            "same case list and the paired tests in §2.1 lose pairs accordingly. Treat a "
+            "run with a large imbalance as provisional and re-run it.",
+            "",
+        ]
+
     # Core metrics table
     L += [
         "| Metric | " + " | ".join(MODE_LABELS[m] for m in present_modes) + " |",
@@ -302,6 +418,36 @@ def generate_report(
         "> post-filter gate (hallucinated IDs + allergen violations proposed by LLM).",
     ]
 
+    # Precision below 1.0 is over-blocking, and over-blocking is what the
+    # coverage column is measuring the cost of. Reporting the two numbers in
+    # separate tables without connecting them let a filter that rejects twice as
+    # many recipes as it needs to read as a pure safety win.
+    ns = safety.get("neurosymbolic") or {}
+    ns_prec = ns.get("pre_filter_precision")
+    if ns_prec is not None and ns_prec < 0.95:
+        over = ns.get("pre_filter_total_rejects", 0) or 0
+        spurious = round(over * (1 - ns_prec))
+        cov = ns.get("coverage")
+        nr_cov = (safety.get("neural_rag") or {}).get("coverage")
+        gap = ""
+        if cov is not None:
+            gap = f", and it is why coverage stops at {_pct(cov)}"
+            if nr_cov is not None and nr_cov > cov:
+                gap += f" where the unfiltered `neural_rag` arm reaches {_pct(nr_cov)}"
+        L += [
+            "",
+            f"> **This precision is a cost, not just a statistic.** At {_sc(ns_prec)}, roughly"
+            f" {spurious} of the {over} recipes the neuro-symbolic pre-filter rejected were"
+            " not in fact unsafe for the profile that rejected them. Every one of those is a"
+            " safe lunch the LLM was never allowed to see"
+            + gap
+            + ". The filter is deliberately conservative — the ingredient-text keyword scan"
+            " rejects on a substring match that the tagged allergen list does not confirm — and"
+            " on a 29-recipe corpus that conservatism is what produces the zero-candidate cases"
+            " in §6. Raising precision without lowering recall is the main headroom left in the"
+            " symbolic layer.",
+        ]
+
     # ── 2.1 Statistical significance ──────────────────────────────────────────
     significance = eval_data.get("significance") or {}
     variance = eval_data.get("repeat_variance") or {}
@@ -341,9 +487,10 @@ def generate_report(
                 "",
                 f"**Stability across {n_rep} repeats** (mean ± SD of the violation rate):",
                 "",
-                "| Pipeline | Violation rate (all cases) | Coverage | Safe & useful |",
-                "|---|---|---|---|",
+                "| Pipeline | Violation rate (all cases) | Coverage | Safe & useful | Repeats used |",
+                "|---|---|---|---|---|",
             ]
+            dropped_any = {}
             for m in present_modes:
                 blk = variance.get(m) or {}
                 def ms(key):
@@ -351,8 +498,27 @@ def generate_report(
                     if d.get("mean") is None:
                         return "—"
                     return f"{d['mean']:.3f}" + (f" ± {d['sd']:.3f}" if d.get("sd") is not None else "")
+                used = blk.get("n_repeats_scored", n_rep)
+                gone = blk.get("repeats_dropped_all_runs_failed") or []
+                if gone:
+                    dropped_any[m] = gone
                 L.append(f"| {MODE_LABELS[m]} | {ms('allergen_violation_rate_over_all_cases')} "
-                         f"| {ms('coverage')} | {ms('safe_and_useful_rate')} |")
+                         f"| {ms('coverage')} | {ms('safe_and_useful_rate')} "
+                         f"| {used}/{n_rep}{' ⚠️' if gone else ''} |")
+            if dropped_any:
+                detail = "; ".join(
+                    f"{MODE_LABELS[m]} lost repeat(s) {', '.join(str(r + 1) for r in reps)}"
+                    for m, reps in dropped_any.items())
+                L += [
+                    "",
+                    f"> **⚠️ Not every repeat survived.** {detail}. In those repeats every run "
+                    "of that arm failed (rate limit or unparseable output), so the arm produced "
+                    "no evidence about itself — only about the API. Such repeats are excluded "
+                    "from the mean and SD above. They must be: a fully failed repeat scores "
+                    "0 violations over an empty denominator, so averaging it in makes an arm "
+                    "look *safer* the more of it died. A run missing repeats is provisional — "
+                    "re-run it when quota allows before citing the SD.",
+                ]
         else:
             L += [
                 "",
@@ -403,13 +569,25 @@ def generate_report(
 
         if llm_m.get("_judge_rubric_anchored"):
             per_case = llm_m.get("_judge_menus_per_case", 1)
-            L += [
-                f"> Scored against an anchored rubric, all three dimensions in a single "
-                f"judge call per menu, so every metric below covers the **same** set of "
-                f"menus. {per_case} menu per case per pipeline is scored, keeping the arms "
-                f"balanced (the rule-based arm returns one option; the LLM arms may return three).",
-                "",
-            ]
+            note = (f"> Scored against an anchored rubric, all three dimensions in a single "
+                    f"judge call per menu, so every metric below covers the **same** set of "
+                    f"menus. {per_case} menu per case per pipeline is scored, keeping the arms "
+                    f"balanced (the rule-based arm returns one option; the LLM arms may "
+                    f"return three).")
+            n_repeats = meta.get("repeats") or 1
+            if n_repeats > 1 and llm_m.get("_judge_all_repeats") is False:
+                note += (f" Safety in §2 is measured over all {n_repeats} repeats; these "
+                         f"quality scores cover the first repeat only, so they carry no "
+                         f"run-to-run spread of their own.")
+            L += [note, ""]
+            if llm_m.get("_judge_rubric_version", 1) < 2:
+                L += [
+                    "> **Faithfulness in this run is not usable.** It was scored under rubric "
+                    "v1, whose SOURCE omitted the recipe's allergen fields — so every "
+                    "allergen claim was unsupportable by construction and the column floors "
+                    "at 0.000. Re-run the evaluator to rescore under v2. See §9.",
+                    "",
+                ]
 
         L += [
             "| Metric | " + " | ".join(MODE_LABELS[m] for m in present_modes) + " |",
@@ -497,24 +675,7 @@ def generate_report(
                     "",
                 ]
             else:
-                rel = paired.get("neurosymbolic_vs_neural_rag::relevance") or {}
-                if rel.get("excludes_zero") is False:
-                    L += [
-                        "A confidence interval spanning zero is the evidence for the claim "
-                        "that the symbolic constraint layer does **not** degrade "
-                        "recommendation quality — the safety gain shown in §2 is not "
-                        "purchased with worse recommendations.",
-                        "",
-                    ]
-                elif rel.get("excludes_zero") and (rel.get("mean_diff") or 0) < 0:
-                    L += [
-                        "Relevance is measurably lower under the symbolic layer. That is the "
-                        "expected cost of pre-filtering the candidate pool, and in this "
-                        "domain a slightly less relevant safe recommendation is preferable "
-                        "to a relevant unsafe one — but the trade-off is real and should be "
-                        "reported as such rather than described as free.",
-                        "",
-                    ]
+                L += [quality_verdict(paired), ""]
     else:
         L += [
             "> LLM-as-judge metrics were not computed in this run.",
@@ -788,6 +949,20 @@ def generate_report(
         "",
         "- **LLM-as-judge availability:** Judge metrics require a live Groq or Ollama",
         "  provider and are skipped in mock runs. Safety metrics are always computed.",
+        "",
+        "- **Faithfulness is measured against a rubric that changed (v2):** runs before",
+        "  2026-08-16 scored faithfulness at or near 0.000 for every arm, because the",
+        "  SOURCE handed to the judge omitted the recipe's allergen fields entirely — so",
+        "  'free from milk', the commonest claim in this domain, had nothing to be checked",
+        "  against and was counted unsupported by construction. SOURCE now states the",
+        "  present *and* absent allergen lists and the rubric says how to score an absence",
+        "  claim (`benchmark/evaluator.py`, `source_text()`). Faithfulness figures from",
+        "  earlier runs are not comparable with these and should not be pooled; the eval",
+        "  JSON records `_judge_rubric_version` so the two can be told apart.",
+        "",
+        "- **Single judge, no human agreement measured:** all quality scores come from one",
+        "  model. The rubric is anchored so that a human could apply it, but no human",
+        "  re-scoring has been done, so judge–human agreement (Cohen's κ) is unknown.",
     ]
 
     hr()
