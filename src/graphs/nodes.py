@@ -30,6 +30,7 @@ from rank_bm25 import BM25Okapi
 from state import PipelineState, RetrievedCandidate, MenuOption
 from document_loader import ALL_14_ALLERGENS, _load_json, load_recipe_chunks
 from guardrails import ChildProfile, check_recipe_against_profile
+from json_parsing import parse_menu_response
 from llm_provider import use_cross_encoder_reranker
 from vector_store import semantic_search as _vector_semantic_search
 from huggingface_upgrade.reranker import get_reranker, rerank_top_k
@@ -419,22 +420,17 @@ def make_generate_node(llm: Any):
                 "latency_ms": _merge_latency(state, "generate", t0),
             }
 
-        clean = raw
-        if clean.startswith("```"):
-            clean = clean.strip("`")
-            if clean.startswith("json"):
-                clean = clean[4:]
-            clean = clean.strip()
-        try:
-            parsed = json.loads(clean)
-            menus = parsed.get("menu_options", [])
-        except json.JSONDecodeError:
-            menus = []
+        # A parse failure is recorded, not silently turned into an empty list.
+        # `menus = []` is exactly what a correct refusal looks like, so the old
+        # handler let a run of malformed responses score as a cautious system
+        # instead of a broken one.
+        menus, parse_error = parse_menu_response(raw)
 
         return {
             "llm_raw_output": raw,
             "proposed_menus": menus,
-            "generation_error": None,
+            "generation_error": (f"Could not parse LLM response: {parse_error}"
+                                 if parse_error else None),
             "latency_ms": _merge_latency(state, "generate", t0),
         }
 

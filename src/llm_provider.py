@@ -220,7 +220,7 @@ def configure_langsmith(project_name: Optional[str] = None) -> bool:
     key = os.environ.get("LANGSMITH_API_KEY", "").strip()
     if not key:
         return False
-    os.environ["LANGCHAIN_TRACING_V2"] = "true"
+    os.environ["LANGCHAIN_TRACING_V2"] = "false"
     os.environ["LANGCHAIN_API_KEY"] = key
     os.environ["LANGCHAIN_PROJECT"] = (
         project_name or os.environ.get("LANGCHAIN_PROJECT", "lunch-rag-benchmark")

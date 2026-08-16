@@ -25,6 +25,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "src" / "graphs"))
 
 from guardrails import ChildProfile
+from json_parsing import parse_json_response
 # The neurosymbolic LangGraph, via main -- the same pipeline the benchmark runs.
 # This module used to drive a second, drifted implementation, so its scores did
 # not describe the system any published result referred to.
@@ -61,14 +62,10 @@ def _judge_call(prompt: str, max_tokens: int = 1500) -> Dict[str, Any]:
     try:
         response = llm.invoke([HumanMessage(content=prompt)])
         raw = (response.content or "").strip()
-        if raw.startswith("```"):
-            raw = raw.strip("`")
-            if raw.startswith("json"):
-                raw = raw[4:]
-            raw = raw.strip()
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        return {"error": raw}
+        parsed, parse_error = parse_json_response(raw)
+        if parsed is None:
+            return {"error": parse_error, "raw": raw[:400]}
+        return parsed
     except Exception as e:
         return {"error": f"{type(e).__name__}: {e}"}
 

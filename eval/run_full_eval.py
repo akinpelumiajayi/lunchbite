@@ -100,19 +100,32 @@ def run_all(provider: Optional[str] = None) -> None:
     print(f"{'=' * 60}")
 
     if scored:
-        def avg(key_path: str) -> Optional[float]:
-            vals = []
+        def avg(key_path: str) -> str:
+            """Mean, always labelled with the sample it covers.
+
+            A value that is missing or unparseable used to be dropped without a
+            word, so a run where most profiles failed to score printed a mean
+            over the survivors that was indistinguishable from a clean run. The
+            n and the drop count are now part of the output, not inferable only
+            from the absence of an error message.
+            """
+            vals, dropped = [], 0
             for r in scored:
-                parts = key_path.split(".")
                 v = r
-                for p in parts:
+                for p in key_path.split("."):
                     v = (v or {}).get(p)
-                if v is not None:
-                    try:
-                        vals.append(float(v))
-                    except (TypeError, ValueError):
-                        pass
-            return round(sum(vals) / len(vals), 3) if vals else None
+                if v is None:
+                    dropped += 1
+                    continue
+                try:
+                    vals.append(float(v))
+                except (TypeError, ValueError):
+                    dropped += 1
+            if not vals:
+                return f"N/A (0 of {len(scored)} scored)"
+            mean = round(sum(vals) / len(vals), 3)
+            suffix = f", {dropped} unscored" if dropped else ""
+            return f"{mean}  (n={len(vals)}{suffix})"
 
         print(f"  Mean faithfulness       : {avg('faithfulness.faithfulness_score')}")
         print(f"  Mean relevancy (1-5)    : {avg('answer_relevancy.relevancy_score')}")
