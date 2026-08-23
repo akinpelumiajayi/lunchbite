@@ -1,17 +1,18 @@
 """
-state.py -- Shared LangGraph state schema for all four pipelines.
+state.py -- Shared LangGraph state schema for every pipeline arm.
 
 Pipeline modes (pipeline_mode field):
   "no_llm"         -- Aim 1 primary baseline: rule-based only, no LLM at all
   "neural_rag"     -- Aim 1 main system: retrieval + LLM, constraints as prompt text
   "neurosymbolic"  -- Aim 2: retrieval + symbolic pre-filter + LLM + symbolic post-filter
   "no_rag"         -- secondary reference control: LLM with profile only, no retrieval
+  "reward_ranked"  -- neurosymbolic + best-of-N reranking on the verifiable reward
 
 The symbolic gates (pre-filter + post-filter) only run in neurosymbolic mode.
 The no_llm baseline never calls an LLM.
 The no_rag control sends only the profile to the LLM without any retrieved context.
 
-All four share this schema so LangSmith traces are directly comparable
+Every arm shares this schema so LangSmith traces are directly comparable
 and the benchmark runner can use a single result record format.
 """
 
@@ -20,7 +21,7 @@ from typing import Any, Dict, List, Optional
 from typing_extensions import TypedDict
 
 
-class ChildProfileDict(TypedDict):
+class ChildProfileDict(TypedDict, total=False):
     age_years: int
     allergies: List[str]
     intolerances: List[str]
@@ -28,6 +29,10 @@ class ChildProfileDict(TypedDict):
     dislikes: List[str]
     school_nut_free: bool
     cultural_context: str
+    # Diets the symbolic layer enforces (vegetarian / vegan / pescatarian /
+    # halal / kosher). Previously carried only as prose in cultural_context,
+    # which reached the generator's prompt and no gate.
+    diet_requirements: List[str]
 
 
 class RetrievedCandidate(TypedDict, total=False):
@@ -69,7 +74,7 @@ class PostFilterResult(TypedDict):
 class PipelineState(TypedDict):
     # Input
     profile: ChildProfileDict
-    pipeline_mode: str    # "no_llm" | "neural_rag" | "neurosymbolic" | "no_rag"
+    pipeline_mode: str    # "no_llm" | "neural_rag" | "neurosymbolic" | "no_rag" | "reward_ranked"
     run_id: str
 
     # Retrieval (empty in no_rag mode)
@@ -94,6 +99,21 @@ class PipelineState(TypedDict):
     # Symbolic post-filter (neurosymbolic only; [] in all others)
     symbolic_post_filter_log: List[PostFilterResult]
     final_menus: List[MenuOption]
+
+    # Iterative retrieve-and-refine. `refine_count` is the number of EXTRA
+    # retrieval passes taken beyond the first, so 0 means the pipeline answered
+    # on its opening attempt. `retrieve_top_k` widens with each pass; it is part
+    # of the state rather than a constant so a refined pass can look further
+    # down the ranking than the pass that came up short.
+    refine_count: int
+    retrieve_top_k: int
+    refine_log: List[Dict[str, Any]]
+
+    # Verifiable-reward reranking (reward_ranked only; [] in all others).
+    # Records the reward each surviving menu scored and whether the ordering
+    # changed, so an arm that reranked nothing is distinguishable from one that
+    # never had two menus to choose between.
+    reward_log: List[Dict[str, Any]]
 
     # Eval metadata
     error: Optional[str]

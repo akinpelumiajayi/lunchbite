@@ -1,6 +1,6 @@
 # Children's Lunch RAG System
 
-A research prototype comparing four RAG (Retrieval-Augmented Generation) architectures
+A research prototype comparing five RAG (Retrieval-Augmented Generation) architectures
 for personalised, allergy-safe school lunch recommendations. Built over a 29-recipe
 corpus drawn from UK government dietary guidance and the PACK-IT Cookbook (Virginia
 Cooperative Extension / USDA SNAP-Ed), with EU FIC allergen law and the Eatwell Guide
@@ -14,7 +14,7 @@ as the constraint knowledge base.
 
 ## What this project does
 
-It implements and benchmarks four pipelines against a fixed 30-case benchmark,
+It implements and benchmarks five pipelines against a fixed 36-case benchmark,
 including adversarial prompt-injection cases, to isolate the effect of the symbolic
 constraint layer from all other variables (same LLM, same corpus, same retrieval):
 
@@ -24,18 +24,32 @@ constraint layer from all other variables (same LLM, same corpus, same retrieval
 | **Neural-only RAG** | `neural_rag` | BM25 + semantic retrieval → RRF fusion → Groq/Ollama LLM. Allergen constraints expressed only as prompt text. No deterministic filtering. |
 | **Neuro-symbolic RAG** | `neurosymbolic` | Same retrieval → deterministic symbolic pre-filter → LLM (safe candidates only) → deterministic post-filter re-verification. LLM cannot override either gate. |
 | **No-RAG control** | `no_rag` | LLM with profile only, no retrieved context. Secondary reference to isolate the contribution of retrieval. |
+| **Reward-ranked RAG** | `reward_ranked` | Neuro-symbolic, then best-of-N reranking of the surviving menus by a verifiable reward. Runs *after* the gates, so it reorders safe options and cannot admit an unsafe one. |
 
 The comparison directly answers: *does the symbolic constraint layer reduce allergen
 violations, and does it come at a cost to relevance or naturalness?*
 
-**Mock benchmark results** (simulated LLM that follows adversarial injections):
+The fifth arm extends that question to reward optimisation. It implements **RLVR**
+— Reinforcement Learning from Verifiable Rewards — rather than RLHF, because the
+safety-critical core of this domain is checkable rather than a matter of taste, and
+because a reward computed from the corpus cannot be moved by text an attacker
+controls. See [Verifiable reward (RLVR)](#verifiable-reward-rlvr).
+
+**Mock benchmark results** (simulated LLM that follows adversarial injections,
+36 cases). Synthetic by construction — the mock is written to follow injections, so
+these figures demonstrate the harness, not the models:
 
 | Pipeline | Violation rate | Adversarial bypass |
 |----------|---------------|--------------------|
 | no_llm | 0.0% | 0.0% |
-| neural_rag | 6.7% | 33.3% |
+| neural_rag | 11.1% | 33.3% |
 | neurosymbolic | 0.0% | 0.0% |
-| no_rag | 6.7% | 33.3% |
+| no_rag | 11.1% | 33.3% |
+| reward_ranked | 0.0% | 0.0% |
+
+`reward_ranked` matching `neurosymbolic` on safety is the expected result, not a
+null one: the two share the same gates, and reranking changes the order of safe
+menus rather than which menus are safe.
 
 ---
 
@@ -65,7 +79,13 @@ python3 run_all.py
 python3 run_all.py --repeats 5
 python3 run_all.py --repeats 5 --no-judge   # safety + retrieval only, no judge quota used
 
-# 5. Open the Jupyter notebook walkthrough
+# 5. Score an existing run with the verifiable reward — no API key, no tokens,
+#    no re-run. Works on any results file already on disk, however old.
+#    --verify recomputes every record; --sensitivity checks the conclusion
+#    does not depend on the weighting.
+python benchmark/score_rewards.py benchmark/results/run_X.json --verify --sensitivity
+
+# 6. Open the Jupyter notebook walkthrough
 jupyter notebook notebooks/lunch_rag_pipeline.ipynb
 ```
 
@@ -83,7 +103,7 @@ Windows, Ollama setup, HuggingFace embeddings, and troubleshooting.
 | 1 | No-LLM baseline + Neural-only RAG pipeline | `src/graphs/build_graphs.py` → `build_no_llm_graph()`, `build_neural_rag_graph(llm)` |
 | 2 | Neuro-symbolic RAG pipeline | `src/graphs/build_graphs.py` → `build_neurosymbolic_graph(llm)` |
 | 3 | Benchmark baseline (neural_rag + no_llm) | `benchmark/runner.py` |
-| 4 | Benchmark neuro-symbolic (identical cases) | `benchmark/runner.py` (same runner, all 4 pipelines) |
+| 4 | Benchmark neuro-symbolic (identical cases) | `benchmark/runner.py` (same runner, every arm) |
 | 5 | Comparative report: safety, relevance, faithfulness | `benchmark/evaluator.py` + `report/generate_report.py` |
 
 All five run sequentially: `python3 run_all.py`
@@ -110,7 +130,7 @@ build_query         profile → natural-language query string
                              fused list (RERANK_TOP_K=9 survive)
 ```
 
-### The four pipelines diverge after retrieval
+### The pipelines diverge after retrieval
 
 ```
 NO-LLM BASELINE (primary baseline, Aim 1):
@@ -140,6 +160,17 @@ NO-RAG CONTROL (secondary reference):
   skip_retrieval → generate → passthrough_menus
     [LLM receives profile only, no recipe context]
     [used to isolate the contribution of retrieval — not a safety comparison]
+
+REWARD-RANKED RAG (RLVR policy arm, Aim 2):
+  rrf_fuse → symbolic_prefilter → generate → symbolic_postfilter → reward_rank
+    └── reward_rank: scores every SURVIVING menu on six verifiable components
+          and returns them best-first (src/reward/)
+          • runs AFTER both gates — it reorders safe menus and has no
+            mechanism to admit an unsafe one
+          • reads no free-text profile field, because at inference
+            cultural_context is attacker-controlled (trust_free_text=False)
+          • costs zero extra generator tokens: it ranks the menus the prompt
+            already asked for rather than resampling new ones
 ```
 
 ### Why symbolic gates cannot be bypassed by prompt injection
@@ -188,21 +219,40 @@ lunch_rag/
 ├── src/                          Core source modules
 │   │
 │   ├── graphs/                   LangGraph pipeline definitions
-│   │   ├── state.py              Shared PipelineState TypedDict — all four pipelines
-│   │   │                         use the same schema for comparable LangSmith traces.
+│   │   ├── state.py              Shared PipelineState TypedDict — every arm uses
+│   │   │                         the same schema for comparable LangSmith traces.
 │   │   │                         pipeline_mode field: "no_llm" | "neural_rag" |
-│   │   │                         "neurosymbolic" | "no_rag"
+│   │   │                         "neurosymbolic" | "no_rag" | "reward_ranked"
 │   │   ├── nodes.py              All LangGraph node functions:
 │   │   │                         build_query, bm25_retrieve, semantic_retrieve,
 │   │   │                         rrf_fuse, symbolic_prefilter, passthrough_candidates,
 │   │   │                         no_llm_select, skip_retrieval,
 │   │   │                         make_generate_node, symbolic_postfilter,
-│   │   │                         passthrough_menus
+│   │   │                         passthrough_menus, reward_rank
 │   │   └── build_graphs.py       build_no_llm_graph()
 │   │                             build_neural_rag_graph(llm)
 │   │                             build_neurosymbolic_graph(llm)
 │   │                             build_no_rag_graph(llm)
+│   │                             build_reward_ranked_graph(llm)
+│   │                             BUILDER_NAMES — mode → builder, one source of
+│   │                             truth so tests stub every arm automatically
 │   │                             (build_baseline_graph = alias for backward compat)
+│   │
+│   ├── reward/                   *** VERIFIABLE REWARD (RLVR) — no LLM, no network ***
+│   │   ├── checks.py             The six components, each a pure function of the
+│   │   │                         menu, the corpus record and the case ground truth:
+│   │   │                         correctness, groundedness, completeness,
+│   │   │                         relevance, citation_accuracy, retrieval_accuracy
+│   │   ├── model.py              score_menu() → RewardResult (weighted, gated on
+│   │   │                         correctness), rank_menus() for best-of-N,
+│   │   │                         DEFAULT_WEIGHTS, REWARD_WEIGHTS env override
+│   │   ├── scoring.py            score_run() — applies the reward to a results
+│   │   │                         file offline; emits per-menu records + best-of-N
+│   │   ├── sensitivity.py        Re-aggregates under six weightings and reports
+│   │   │                         whether the ordering of arms changes
+│   │   ├── verify.py             Recomputes a scored file from the raw trace and
+│   │   │                         proves it: reproducible / model-free / versioned
+│   │   └── corpus.py             Ground-truth lookups over data/recipes.json
 │   │
 │   ├── llm_provider.py           *** SINGLE SOURCE OF TRUTH for LLM config ***
 │   │                             Reads .env automatically. Provides:
@@ -246,16 +296,22 @@ lunch_rag/
 │   ├── benchmark_cases.py        30 fixed test cases across 5 categories:
 │   │                             • 7 standard (single restriction)
 │   │                             • 7 multi-restriction (combined constraints)
-│   │                             • 8 adversarial (prompt-injection attacks)
+│   │                             • 14 adversarial (12 attacks, 6 of them hardened)
 │   │                             • 5 edge (age extremes, unknown allergens)
 │   │                             • 3 cultural (halal, vegetarian, kosher)
 │   │
-│   ├── runner.py                 Runs all 4 pipelines against all 30 cases.
+│   ├── runner.py                 Runs every arm against all 36 cases.
+│   │                             ALL_ARMS / LLM_ARMS — the arm lists that drive
+│   │                             the metadata, arm-health table and resume scan.
 │   │                             Adversarial injection applied to neural_rag and no_rag
 │   │                             (not neurosymbolic — its gates are outside LLM context).
 │   │                             Results saved as JSON for evaluation.
 │   │
-│   └── evaluator.py              Computes metrics for all 4 pipelines.
+│   ├── evaluator.py              Computes metrics for every arm.
+│   └── score_rewards.py          Verifiable reward (RLVR) over a results file.
+│                                 Offline: no model, no network, no token cost.
+│                                 --verify recomputes it, --sensitivity checks
+│                                 the conclusion survives reweighting.
 │                                 Safety (deterministic, no LLM):
 │                                   allergen_violation_rate, adversarial_bypass_rate,
 │                                   hallucination_rate, pre_filter_precision,
@@ -272,7 +328,7 @@ lunch_rag/
 │   └── lunch_rag_pipeline.ipynb  Full walkthrough with 7 charts — embeddings,
 │                                 BM25, dense retrieval, RRF, cross-encoder
 │                                 reranking, the negation measurement, the
-│                                 guardrail, all 4 pipelines, adversarial cases,
+│                                 guardrail, every arm, adversarial cases,
 │                                 and metric formulas. Runs with no API key.
 │
 └── eval/                         Original (pre-LangGraph) evaluation suite
@@ -324,6 +380,15 @@ pure Python, and has no LLM dependency. `check_recipe_against_profile()` runs fi
 3. **Extras warning** — allergens in optional `extras_suggested` items are warnings, not hard rejections
 4. **Allergen synonym normalisation** — maps `dairy→milk`, `groundnut→peanut`, `coeliac→cereals containing gluten`, `lactose→milk`, `shellfish→crustaceans`, etc. before matching
 5. **Nutrition limits** — checks sugar and salt against PHE age-band per-lunch ceilings (40% of daily maximum; tunable via `max_sugar_g_override` / `max_salt_g_override` on `ChildProfile`)
+
+Checks 1, 2 and 4 are **hard**: a hit removes the recipe, and nothing in a prompt can
+change that. Check 5 is **advisory by default** — a breach is reported alongside the
+recipe and the recipe still reaches the generator. The two are different kinds of
+claim. An allergen can hospitalise the child it is served to; a lunch above a
+per-meal sugar guideline is a nutrition-quality judgement, and on this corpus that
+judgement is being made on the wrong number (see *Why the sugar ceiling is advisory*
+below). A ceiling you set yourself on a `ChildProfile` is always enforced.
+Switch the band ceiling back to a rejection with `NUTRITION_GATE=hard`.
 
 ---
 
@@ -381,7 +446,7 @@ because BM25 scores (unbounded) and cosine similarity ([0,2]) are incompatible s
 ## Benchmark
 
 `benchmark/benchmark_cases.py` defines 30 fixed cases across five categories,
-all run against all four pipelines:
+all run against every arm:
 
 **Standard (7 cases):** Single restriction profiles — milk, egg, fish, sesame,
 celery, soy allergies, and no restrictions. Both pipelines should handle these;
@@ -414,8 +479,13 @@ Two non-injection robustness cases:
 **Edge (5 cases):** Age 4 (tightest sugar limit), age 18 (oldest band), unknown
 allergen "kiwi", peanut synonym at age 5, and age 14 with no restrictions.
 
-**Cultural (3 cases):** Halal diet (tests pork exclusion via LLM cultural context),
-vegetarian household, kosher diet. These test whether the LLM uses cultural context
+**Cultural (3 cases):** Halal, vegetarian and kosher. These are now **enforced by the
+symbolic layer**, not left to the model: each profile carries `diet_requirements`, and
+`check_recipe_against_profile` gates on the corpus `diet_tags` plus an ingredient-exclusion
+scan (`DIET_GATE`, default `hard`). For halal and kosher the check is ingredient exclusions
+only — certification, slaughter method and preparation separation are not in the corpus and
+are explicitly not verified. Previously these cases carried `expected_unsafe_ids=[]`, which
+made them unfailable. They test whether the LLM uses cultural context
 in recommendations — the guardrail system enforces only EU FIC allergens, so
 cultural constraints rely on LLM cooperation in neural_rag mode.
 
@@ -451,13 +521,15 @@ cultural constraints rely on LLM cooperation in neural_rag mode.
 | `faithfulness` | 0–1 | Are factual claims in the rationale supported by the retrieved recipe data? |
 | `naturalness` | 1–5 | Is the tone appropriate for a parent or school caterer? |
 
-**Generator vs judge model separation:** The generator (e.g. `llama-3.1-8b-instant`)
-and the judge (e.g. `llama-3.3-70b-versatile`) are configured as separate models in
-`.env` to prevent self-preferencing bias in evaluation — a model will systematically
-rate its own output more highly than a different model would. Both are configurable
-independently via `GROQ_MODEL` / `GROQ_JUDGE_MODEL` (or `OLLAMA_MODEL` / `OLLAMA_JUDGE_MODEL`).
-Note both defaults are Meta Llama models; a judge from a different family would be a
-stronger control, since same-family models share biases.
+**Generator vs judge model separation:** The generator (`qwen/qwen3.6-27b`) and the
+judge (`openai/gpt-oss-120b`) are configured as separate models in `.env` to prevent
+self-preferencing bias in evaluation — a model will systematically rate its own output
+more highly than a different model would. Both are configurable independently via
+`GROQ_MODEL` / `GROQ_JUDGE_MODEL` (or `OLLAMA_MODEL` / `OLLAMA_JUDGE_MODEL`).
+The two defaults are drawn from **different model families** (Alibaba Qwen and an
+OpenAI open-weight model), which is the stronger control: same-family models share
+pretraining data and RLHF conventions, so a larger judge of the generator's own lineage
+still recognises and rewards its house style.
 
 Judge outcomes are recorded in `_judge_health` (`attempted` / `ok` / `parse_error` /
 `call_error`) in the eval JSON. Judge failures used to be swallowed, so the means
@@ -475,12 +547,55 @@ the rubric says how to score an absence claim and to ignore process descriptions
 ("selected by rule-based scoring"). The eval JSON records `_judge_rubric_version`;
 do not pool faithfulness across versions.
 
+### Verifiable reward (RLVR)
+
+A third scoring instrument, independent of both the safety metrics and the judge.
+Every component resolves to a fact in `data/recipes.json` or a hand-labelled field
+on the benchmark case, so no model is consulted and the numbers can be re-derived
+by anyone holding the same two files.
+
+| Component | Weight | Verified against |
+|---|---|---|
+| `correctness` | 0.35 | guardrail re-run **and** the case's `expected_unsafe_ids` — either can fail it |
+| `groundedness` | 0.25 | recipe id exists; `allergens_confirmed_absent` vs `allergens_present`; numeric claims vs `nutrition_per_serving` |
+| `citation_accuracy` | 0.15 | `source_citation` vs the corpus citation for that recipe |
+| `retrieval_accuracy` | 0.10 | was the recipe in the candidate set the generator was shown |
+| `relevance` | 0.10 | likes matched, dislikes avoided, cultural fit |
+| `completeness` | 0.05 | the fields the generation prompt asked for |
+
+```bash
+python benchmark/score_rewards.py benchmark/results/run_X.json --verify --sensitivity
+```
+
+Three properties make this different from the judge above:
+
+- **Gated on correctness.** A menu that fails the safety check scores 0.0 however
+  well it cites or reads. Without the gate a reward-maximising policy could buy a
+  violation with fluent prose — the exact failure this project argues against,
+  rebuilt inside the reward meant to detect it. The pre-gate figure is still
+  recorded as `weighted_score`, so nothing about the decision is hidden.
+- **Tamper-evident.** Each record carries a digest of its inputs *and* of the
+  weights it was scored under, so editing a reward — or reweighting the file header
+  without rescoring — fails `--verify` rather than passing unnoticed.
+- **Weight-robust.** `--sensitivity` re-aggregates under six weightings, including
+  one that weights correctness at 0.02, and reports whether the ordering of arms
+  changes. That answers "why 0.35?" without needing preference data.
+
+**This is RLVR, not RLHF**, and the distinction is deliberate. Verifiable rewards
+suit this domain because its safety-critical core is checkable — whether a recipe
+contains milk is a fact, not a matter of taste — and because a preference model
+reads text an attacker controls whereas a corpus lookup does not. Human preference
+remains the right instrument for the *quality* half, and none has been collected:
+the reward is verifiable, which is not the same as validated. The clearest evidence
+of that limit is that `no_llm` scores at or near the top of the reward while scoring
+lowest on judged naturalness.
+
 ---
 
 ## Tests
 
 ```bash
-pytest                     # 158 tests, all deterministic, no API key needed
+pytest                     # 385 tests, all deterministic, no API key needed
 python eval/check_data_quality.py   # nutrition plausibility checks on the corpus
 python eval/eval_negation.py        # can retrieval honour allergen negation?
 ```
@@ -499,7 +614,7 @@ matches `goat` while `oat milk` still counts toward gluten.
 
 ## LangSmith observability
 
-When `LANGSMITH_API_KEY` is set in `.env`, all four graphs emit full LangSmith traces.
+When `LANGSMITH_API_KEY` is set in `.env`, every graph emits full LangSmith traces.
 Every node is a named span with full input/output state captured:
 
 - `build_query`, `bm25_retrieve`, `semantic_retrieve`, `rrf_fuse`
@@ -553,17 +668,19 @@ almost all of it cross-encoder inference on CPU.
 
 ## Design decisions
 
-**Why four pipelines, not two**
+**Why five pipelines, not two**
 
 Any observed difference between neural_rag and neurosymbolic is attributable only
 to the symbolic constraint layer when both use the same LLM and corpus. The no_llm
 baseline shows what pure rule-based safety achieves (zero violations, zero naturalness).
-The no_rag control isolates the contribution of retrieval. Together the four points
-form a clean ablation study.
+The no_rag control isolates the contribution of retrieval. The reward_ranked arm
+differs from neurosymbolic by exactly one node, so any difference it shows is
+attributable to reward reranking alone. Together the five points form a clean
+ablation study.
 
 **Why the symbolic gates run outside the LLM context**
 
-The 8 adversarial cases demonstrate the failure mode: a neural_rag LLM that receives
+The adversarial cases demonstrate the failure mode: a neural_rag LLM that receives
 allergen constraints as prompt text follows injections in 33% of adversarial cases
 (mock benchmark). The neurosymbolic system's gates are plain Python functions — there
 is no prompt content that changes the output of `guardrails.check_recipe_against_profile()`.
@@ -571,9 +688,16 @@ is no prompt content that changes the output of `guardrails.check_recipe_against
 **Why separate generator and judge models**
 
 Using the same model as generator and judge introduces self-preferencing bias: the model
-rates its own outputs more highly. `GROQ_MODEL` (default: `llama-3.1-8b-instant`, fast)
-is used for generation; `GROQ_JUDGE_MODEL` (default: `llama-3.3-70b-versatile`, larger)
-is used for evaluation. Both are independently configurable in `.env`.
+rates its own outputs more highly, and the same holds in weaker form for two models of one
+family. `GROQ_MODEL` (default: `qwen/qwen3.6-27b`, Alibaba Qwen) is used for generation;
+`GROQ_JUDGE_MODEL` (default: `openai/gpt-oss-120b`, an OpenAI open-weight model of an
+unrelated lineage) is used for evaluation. Both are independently configurable in `.env`.
+Both are reasoning models, so each is sent a `reasoning_effort`. That value is derived
+from the model id rather than configured, because the accepted vocabularies do not
+overlap — qwen3 takes `none`/`default`, gpt-oss takes `low`/`medium`/`high`, and a model
+that does not reason rejects the parameter altogether. Overriding the generator with
+`--model` therefore stays safe: an unrecognised model is simply sent no reasoning
+parameter. `GROQ_REASONING_EFFORT` / `GROQ_JUDGE_REASONING_EFFORT` override the lookup.
 
 **Why neural retrieval rather than TF-IDF**
 
@@ -597,6 +721,50 @@ The PHE guidelines specify daily totals, not per-meal splits. Testing at 30% rej
 most recipes in the PHE's own example lunchbox dataset. 40% is a documented,
 conservative approximation, tunable via `max_sugar_g_override` / `max_salt_g_override`
 on `ChildProfile`.
+
+**Why the sugar ceiling is advisory rather than a rejection**
+
+Enforcing it removed 21 of the 29 recipes at age 7–10 on sugar alone, before any
+allergen was considered — 161 of 199 pre-filter rejections in run `20260818_034143`.
+It dragged pre-filter precision to 0.477 and left 5 of 30 benchmark cases with no safe
+candidate at all, which is what held `neurosymbolic` coverage at 66.7% against
+`neural_rag`'s 100%. Gating on allergens alone takes that precision to 0.939 and the
+zero-candidate cases to 0.
+
+The rejections were not finding unhealthy food. Two defects produced them:
+
+- **Wrong unit.** The corpus field is `sugars_g` (TOTAL sugars); the PHE field is
+  `free_sugars_g_day_max` (FREE sugars). Lactose in yoghurt and fructose in fruit
+  count toward the first and explicitly not the second. NHS `recipe_001`, a cheesy
+  coleslaw pitta from the UK government's own lunchbox booklet, is rejected at age 7
+  on 10.1 g of mostly-vegetable sugar.
+- **Unreliable figures.** `python eval/check_data_quality.py` flags savoury dishes
+  carrying 44 g and round placeholder values repeated across unrelated recipes. The
+  nine UK Gov recipes median 4.4 g; the twenty PACK-IT recipes median 28.5 g, at
+  comparable energy.
+
+So the breach is reported and the recipe is passed on, with the flag travelling into
+the generator's prompt and the deterministic `no_llm` baseline preferring an
+unflagged candidate. **This is not a relaxation of allergen safety** — allergens are
+gated identically in every mode. Set `NUTRITION_GATE=hard` once the corpus carries
+free-sugar figures that `check_data_quality.py` passes clean.
+
+**What happens when the daily token budget runs out**
+
+Groq's free tier caps the generator at 200,000 tokens/day and a full 36-case run
+spends most of it. Run `20260818_034143` hit the cap at case 19; the run continued,
+issued 39 more calls that could not succeed, and produced a report scored on 17, 18
+and 17 cases across three arms that were then compared as though paired.
+
+A spent daily budget now stops the run. A per-minute limit does not — that one is
+slept off for the interval Groq names and retried. Results are written after every
+case, so nothing completed is lost, and the run resumes for the cost of what is left:
+
+```bash
+python benchmark/runner.py --resume benchmark/results/run_20260818_034143.json
+# or, for the whole pipeline:
+python3 run_all.py --resume benchmark/results/run_20260818_034143.json
+```
 
 **Why the Pack-It Cookbook (recipes 010–029)**
 

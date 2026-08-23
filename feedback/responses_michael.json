@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "annotator": "Michael",
+    "instrument": "instrument_20260822_093931.json",
+    "instrument_version": 1,
+    "reward_version": 1,
+    "judge_rubric_version": 2,
+    "started": "20260822_103615"
+  },
+  "ratings": [
+    {
+      "item_id": "IT-025",
+      "annotator": "Michael",
+      "relevance": 5,
+      "faithfulness": 1.0,
+      "naturalness": 5,
+      "ts": "20260822_103831"
+    }
+  ],
+  "preferences": []
+}

@@ -31,6 +31,7 @@ from guardrails import (  # noqa: E402
     lunch_fraction,
     normalize_allergy_terms,
     normalize_allergy_terms_with_unknowns,
+    nutrition_gate,
 )
 
 
@@ -208,3 +209,75 @@ def test_keyword_hit_respects_word_boundaries():
 def test_every_canonical_allergen_has_keywords():
     for allergen, keywords in ALLERGEN_KEYWORDS.items():
         assert keywords, f"{allergen} has no keywords"
+
+
+# ── nutrition gate: hard for allergens, advisory for band ceilings ───────────
+
+@pytest.fixture(autouse=True)
+def _default_gate(monkeypatch):
+    """Every test below states the gate it means, so none inherits a stray .env."""
+    monkeypatch.delenv("NUTRITION_GATE", raising=False)
+
+
+def test_band_ceiling_is_advisory_by_default():
+    """
+    A sugar figure over the band ceiling must not remove the recipe.
+
+    `sugars_g` is TOTAL sugars and the guideline is FREE sugars, so a lunch is
+    charged for the lactose in its yoghurt and the fructose in its fruit. Making
+    that a rejection threw out 21 of the 29 corpus recipes at age 7-10 before an
+    allergen was considered.
+    """
+    recipe = make_recipe(["rice"], sugars=40.0)
+    result = check_recipe_against_profile(recipe, ChildProfile(age_years=8))
+
+    assert result.passed
+    assert result.nutrition_flags, "the breach must still be reported"
+    assert any("Sugar" in w for w in result.warnings)
+
+
+def test_hard_gate_still_rejects_when_asked(monkeypatch):
+    monkeypatch.setenv("NUTRITION_GATE", "hard")
+    recipe = make_recipe(["rice"], sugars=40.0)
+    result = check_recipe_against_profile(recipe, ChildProfile(age_years=8))
+
+    assert not result.passed
+    assert any("Sugar" in r for r in result.reasons_for_rejection)
+
+
+def test_off_gate_reports_nothing(monkeypatch):
+    monkeypatch.setenv("NUTRITION_GATE", "off")
+    recipe = make_recipe(["rice"], sugars=40.0)
+    result = check_recipe_against_profile(recipe, ChildProfile(age_years=8))
+
+    assert result.passed
+    assert result.nutrition_flags == []
+
+
+@pytest.mark.parametrize("mode", ["advisory", "hard", "off"])
+def test_an_explicit_override_is_enforced_in_every_gate_mode(monkeypatch, mode):
+    """A ceiling set for one child is an instruction, not an inference from the
+    corpus, so no gate mode may downgrade it to a warning."""
+    monkeypatch.setenv("NUTRITION_GATE", mode)
+    recipe = make_recipe(["rice"], sugars=40.0)
+    result = check_recipe_against_profile(
+        recipe, ChildProfile(age_years=8, max_sugar_g_override=5.0))
+
+    assert not result.passed
+    assert any("Sugar" in r for r in result.reasons_for_rejection)
+
+
+@pytest.mark.parametrize("mode", ["advisory", "hard", "off"])
+def test_an_allergen_is_rejected_in_every_gate_mode(monkeypatch, mode):
+    """The gate governs nutrition only. Allergen safety is never negotiable."""
+    monkeypatch.setenv("NUTRITION_GATE", mode)
+    recipe = make_recipe(["cheddar cheese"], allergens=["milk"])
+    result = check_recipe_against_profile(
+        recipe, ChildProfile(age_years=8, allergies=["milk"]))
+
+    assert not result.passed
+
+
+def test_unrecognised_gate_value_falls_back_to_advisory(monkeypatch):
+    monkeypatch.setenv("NUTRITION_GATE", "strict-ish")
+    assert nutrition_gate() == "advisory"

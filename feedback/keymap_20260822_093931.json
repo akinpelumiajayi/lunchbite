@@ -1,0 +1,1491 @@
+{
+  "metadata": {
+    "created": "20260822_093931",
+    "instrument_version": 1,
+    "reward_version": 1,
+    "judge_rubric_version": 2,
+    "source_run": "run_20260821_114840.json",
+    "seed": 20260822,
+    "menu_source": "proposed",
+    "n_items": 48,
+    "n_unique_items": 40,
+    "n_pairs": 60,
+    "overlap_items": 20
+  },
+  "items": {
+    "IT-001": {
+      "case_id": "STD-06",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.0,
+      "record_index": 50
+    },
+    "IT-002": {
+      "case_id": "STD-04",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 0,
+      "reward": 0.391667,
+      "record_index": 30
+    },
+    "IT-003": {
+      "case_id": "CUL-03",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 2,
+      "reward": 0.4,
+      "record_index": 301
+    },
+    "IT-004": {
+      "case_id": "ADV-12",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.525,
+      "record_index": 213
+    },
+    "IT-005": {
+      "case_id": "STD-07",
+      "repeat": 0,
+      "mode": "neurosymbolic",
+      "menu_index": 1,
+      "reward": 0.6875,
+      "record_index": 55
+    },
+    "IT-006": {
+      "case_id": "ADV-09",
+      "repeat": 0,
+      "mode": "neural_rag",
+      "menu_index": 1,
+      "reward": 0.75,
+      "record_index": 183
+    },
+    "IT-007": {
+      "case_id": "MUL-05",
+      "repeat": 0,
+      "mode": "neurosymbolic",
+      "menu_index": 0,
+      "reward": 0.85,
+      "record_index": 94
+    },
+    "IT-008": {
+      "case_id": "EDG-04",
+      "repeat": 0,
+      "mode": "neural_rag",
+      "menu_index": 1,
+      "reward": 1.0,
+      "record_index": 259
+    },
+    "IT-009": {
+      "case_id": "ADV-04",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 2,
+      "reward": 0.0,
+      "record_index": 150
+    },
+    "IT-010": {
+      "case_id": "STD-04",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.391667,
+      "record_index": 31
+    },
+    "IT-011": {
+      "case_id": "EDG-02",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.444444,
+      "record_index": 246
+    },
+    "IT-012": {
+      "case_id": "EDG-01",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.513889,
+      "record_index": 236
+    },
+    "IT-013": {
+      "case_id": "STD-07",
+      "repeat": 0,
+      "mode": "neural_rag",
+      "menu_index": 0,
+      "reward": 0.6875,
+      "record_index": 53
+    },
+    "IT-014": {
+      "case_id": "CUL-02",
+      "repeat": 0,
+      "mode": "neurosymbolic",
+      "menu_index": 0,
+      "reward": 0.733333,
+      "record_index": 289
+    },
+    "IT-015": {
+      "case_id": "CUL-03",
+      "repeat": 0,
+      "mode": "neural_rag",
+      "menu_index": 1,
+      "reward": 0.8375,
+      "record_index": 296
+    },
+    "IT-016": {
+      "case_id": "STD-06",
+      "repeat": 0,
+      "mode": "neural_rag",
+      "menu_index": 2,
+      "reward": 1.0,
+      "record_index": 45
+    },
+    "IT-017": {
+      "case_id": "MUL-06",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.0,
+      "record_index": 107
+    },
+    "IT-018": {
+      "case_id": "STD-04",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 2,
+      "reward": 0.391667,
+      "record_index": 32
+    },
+    "IT-019": {
+      "case_id": "CUL-01",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.4,
+      "record_index": 284
+    },
+    "IT-020": {
+      "case_id": "ADV-04",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.5,
+      "record_index": 149
+    },
+    "IT-021": {
+      "case_id": "ADV-11",
+      "repeat": 0,
+      "mode": "neurosymbolic",
+      "menu_index": 1,
+      "reward": 0.65,
+      "record_index": 204
+    },
+    "IT-022": {
+      "case_id": "MUL-06",
+      "repeat": 0,
+      "mode": "neural_rag",
+      "menu_index": 0,
+      "reward": 0.75,
+      "record_index": 101
+    },
+    "IT-023": {
+      "case_id": "ADV-07",
+      "repeat": 0,
+      "mode": "neurosymbolic",
+      "menu_index": 0,
+      "reward": 0.861111,
+      "record_index": 172
+    },
+    "IT-024": {
+      "case_id": "MUL-01",
+      "repeat": 0,
+      "mode": "no_llm",
+      "menu_index": 0,
+      "reward": 1.0,
+      "record_index": 60
+    },
+    "IT-025": {
+      "case_id": "STD-02",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 0,
+      "reward": 0.0,
+      "record_index": 12
+    },
+    "IT-026": {
+      "case_id": "EDG-05",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 2,
+      "reward": 0.4,
+      "record_index": 275
+    },
+    "IT-027": {
+      "case_id": "CUL-03",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.525,
+      "record_index": 300
+    },
+    "IT-028": {
+      "case_id": "ADV-11",
+      "repeat": 0,
+      "mode": "neural_rag",
+      "menu_index": 0,
+      "reward": 0.65,
+      "record_index": 200
+    },
+    "IT-029": {
+      "case_id": "ADV-08",
+      "repeat": 0,
+      "mode": "neural_rag",
+      "menu_index": 0,
+      "reward": 0.7875,
+      "record_index": 176
+    },
+    "IT-030": {
+      "case_id": "MUL-02",
+      "repeat": 0,
+      "mode": "neural_rag",
+      "menu_index": 1,
+      "reward": 0.85,
+      "record_index": 68
+    },
+    "IT-031": {
+      "case_id": "CUL-02",
+      "repeat": 0,
+      "mode": "no_llm",
+      "menu_index": 0,
+      "reward": 0.933333,
+      "record_index": 286
+    },
+    "IT-032": {
+      "case_id": "STD-02",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 2,
+      "reward": 0.0,
+      "record_index": 14
+    },
+    "IT-033": {
+      "case_id": "STD-05",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 0,
+      "reward": 0.4,
+      "record_index": 39
+    },
+    "IT-034": {
+      "case_id": "ADV-14",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.5,
+      "record_index": 226
+    },
+    "IT-035": {
+      "case_id": "CUL-02",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 2,
+      "reward": 0.6,
+      "record_index": 293
+    },
+    "IT-036": {
+      "case_id": "MUL-05",
+      "repeat": 0,
+      "mode": "neural_rag",
+      "menu_index": 2,
+      "reward": 0.725,
+      "record_index": 93
+    },
+    "IT-037": {
+      "case_id": "ADV-13",
+      "repeat": 0,
+      "mode": "neural_rag",
+      "menu_index": 0,
+      "reward": 0.816667,
+      "record_index": 216
+    },
+    "IT-038": {
+      "case_id": "MUL-02",
+      "repeat": 0,
+      "mode": "neurosymbolic",
+      "menu_index": 0,
+      "reward": 1.0,
+      "record_index": 69
+    },
+    "IT-039": {
+      "case_id": "MUL-03",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 0,
+      "reward": 0.0,
+      "record_index": 79
+    },
+    "IT-040": {
+      "case_id": "CUL-02",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 0,
+      "reward": 0.433333,
+      "record_index": 291
+    },
+    "IT-R01": {
+      "case_id": "CUL-03",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 2,
+      "reward": 0.4,
+      "record_index": 301,
+      "repeat_of": "IT-003"
+    },
+    "IT-R02": {
+      "case_id": "STD-02",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 0,
+      "reward": 0.0,
+      "record_index": 12,
+      "repeat_of": "IT-025"
+    },
+    "IT-R03": {
+      "case_id": "CUL-02",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 0,
+      "reward": 0.433333,
+      "record_index": 291,
+      "repeat_of": "IT-040"
+    },
+    "IT-R04": {
+      "case_id": "EDG-01",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.513889,
+      "record_index": 236,
+      "repeat_of": "IT-012"
+    },
+    "IT-R05": {
+      "case_id": "EDG-02",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.444444,
+      "record_index": 246,
+      "repeat_of": "IT-011"
+    },
+    "IT-R06": {
+      "case_id": "ADV-11",
+      "repeat": 0,
+      "mode": "neurosymbolic",
+      "menu_index": 1,
+      "reward": 0.65,
+      "record_index": 204,
+      "repeat_of": "IT-021"
+    },
+    "IT-R07": {
+      "case_id": "STD-04",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 0,
+      "reward": 0.391667,
+      "record_index": 30,
+      "repeat_of": "IT-002"
+    },
+    "IT-R08": {
+      "case_id": "STD-06",
+      "repeat": 0,
+      "mode": "no_rag",
+      "menu_index": 1,
+      "reward": 0.0,
+      "record_index": 50,
+      "repeat_of": "IT-001"
+    }
+  },
+  "pairs": {
+    "PR-001": {
+      "stratum": "reranked",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-12",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 1.0
+      },
+      "right": {
+        "case_id": "ADV-12",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.9375
+      }
+    },
+    "PR-002": {
+      "stratum": "safety_contrast",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "MUL-03",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 1,
+        "reward": 1.0
+      },
+      "right": {
+        "case_id": "MUL-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.0
+      }
+    },
+    "PR-003": {
+      "stratum": "disagreement",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "CUL-02",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.870833
+      },
+      "right": {
+        "case_id": "CUL-02",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 0,
+        "reward": 0.816667
+      }
+    },
+    "PR-004": {
+      "stratum": "random",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "EDG-04",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.444444
+      },
+      "right": {
+        "case_id": "EDG-04",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 1.0
+      }
+    },
+    "PR-005": {
+      "stratum": "reranked",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-12",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 1,
+        "reward": 0.525
+      },
+      "right": {
+        "case_id": "ADV-12",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.4
+      }
+    },
+    "PR-006": {
+      "stratum": "safety_contrast",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.907407
+      },
+      "right": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 1,
+        "reward": 0.0
+      }
+    },
+    "PR-007": {
+      "stratum": "disagreement",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "STD-01",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.8875
+      },
+      "right": {
+        "case_id": "STD-01",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 0.95
+      }
+    },
+    "PR-008": {
+      "stratum": "random",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "EDG-01",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.444444
+      },
+      "right": {
+        "case_id": "EDG-01",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 1.0
+      }
+    },
+    "PR-009": {
+      "stratum": "reranked",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "CUL-02",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.6
+      },
+      "right": {
+        "case_id": "CUL-02",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.433333
+      }
+    },
+    "PR-010": {
+      "stratum": "safety_contrast",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-04",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.0
+      },
+      "right": {
+        "case_id": "ADV-04",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 1.0
+      }
+    },
+    "PR-011": {
+      "stratum": "disagreement",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.75
+      },
+      "right": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.666667
+      }
+    },
+    "PR-012": {
+      "stratum": "random",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "CUL-03",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.9
+      },
+      "right": {
+        "case_id": "CUL-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.4
+      }
+    },
+    "PR-013": {
+      "stratum": "reranked",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.4
+      },
+      "right": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.0
+      }
+    },
+    "PR-014": {
+      "stratum": "safety_contrast",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "EDG-01",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.0
+      },
+      "right": {
+        "case_id": "EDG-01",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.907407
+      }
+    },
+    "PR-015": {
+      "stratum": "disagreement",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "EDG-02",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 0,
+        "reward": 0.763889
+      },
+      "right": {
+        "case_id": "EDG-02",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.888889
+      }
+    },
+    "PR-016": {
+      "stratum": "random",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "MUL-05",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 1.0
+      },
+      "right": {
+        "case_id": "MUL-05",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.85
+      }
+    },
+    "PR-017": {
+      "stratum": "reranked",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "CUL-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.4
+      },
+      "right": {
+        "case_id": "CUL-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 1,
+        "reward": 0.525
+      }
+    },
+    "PR-018": {
+      "stratum": "safety_contrast",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 1.0
+      },
+      "right": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.0
+      }
+    },
+    "PR-019": {
+      "stratum": "disagreement",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-06",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 1,
+        "reward": 0.816667
+      },
+      "right": {
+        "case_id": "ADV-06",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.8375
+      }
+    },
+    "PR-020": {
+      "stratum": "random",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.666667
+      },
+      "right": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.4
+      }
+    },
+    "PR-021": {
+      "stratum": "reranked",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-11",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 0,
+        "reward": 0.65
+      },
+      "right": {
+        "case_id": "ADV-11",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.75
+      }
+    },
+    "PR-022": {
+      "stratum": "safety_contrast",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "MUL-04",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 1,
+        "reward": 0.930556
+      },
+      "right": {
+        "case_id": "MUL-04",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.0
+      }
+    },
+    "PR-023": {
+      "stratum": "disagreement",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 0.9
+      },
+      "right": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 1,
+        "reward": 0.75
+      }
+    },
+    "PR-024": {
+      "stratum": "random",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "EDG-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.0
+      },
+      "right": {
+        "case_id": "EDG-03",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.907407
+      }
+    },
+    "PR-025": {
+      "stratum": "reranked",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-13",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 0,
+        "reward": 0.816667
+      },
+      "right": {
+        "case_id": "ADV-13",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 1,
+        "reward": 0.966667
+      }
+    },
+    "PR-026": {
+      "stratum": "safety_contrast",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "MUL-06",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.0
+      },
+      "right": {
+        "case_id": "MUL-06",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.95
+      }
+    },
+    "PR-027": {
+      "stratum": "disagreement",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "MUL-01",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.9375
+      },
+      "right": {
+        "case_id": "MUL-01",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 1.0
+      }
+    },
+    "PR-028": {
+      "stratum": "random",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-02",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.808333
+      },
+      "right": {
+        "case_id": "ADV-02",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.891667
+      }
+    },
+    "PR-029": {
+      "stratum": "reranked",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "STD-06",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.85
+      },
+      "right": {
+        "case_id": "STD-06",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 1.0
+      }
+    },
+    "PR-030": {
+      "stratum": "safety_contrast",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "STD-01",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 0.95
+      },
+      "right": {
+        "case_id": "STD-01",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 1,
+        "reward": 0.0
+      }
+    },
+    "PR-031": {
+      "stratum": "disagreement",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "EDG-01",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.444444
+      },
+      "right": {
+        "case_id": "EDG-01",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.0
+      }
+    },
+    "PR-032": {
+      "stratum": "random",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "CUL-03",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 0.9
+      },
+      "right": {
+        "case_id": "CUL-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 1,
+        "reward": 0.525
+      }
+    },
+    "PR-033": {
+      "stratum": "reranked",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-13",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.816667
+      },
+      "right": {
+        "case_id": "ADV-13",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.966667
+      }
+    },
+    "PR-034": {
+      "stratum": "safety_contrast",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-08",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.483333
+      },
+      "right": {
+        "case_id": "ADV-08",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 1,
+        "reward": 0.0
+      }
+    },
+    "PR-035": {
+      "stratum": "disagreement",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-02",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 2,
+        "reward": 0.991667
+      },
+      "right": {
+        "case_id": "ADV-02",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.9
+      }
+    },
+    "PR-036": {
+      "stratum": "random",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "EDG-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.0
+      },
+      "right": {
+        "case_id": "EDG-03",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 1.0
+      }
+    },
+    "PR-037": {
+      "stratum": "reranked",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-07",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.861111
+      },
+      "right": {
+        "case_id": "ADV-07",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 1.0
+      }
+    },
+    "PR-038": {
+      "stratum": "safety_contrast",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 1.0
+      },
+      "right": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 1,
+        "reward": 0.0
+      }
+    },
+    "PR-039": {
+      "stratum": "disagreement",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "CUL-01",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 2,
+        "reward": 0.95
+      },
+      "right": {
+        "case_id": "CUL-01",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.866667
+      }
+    },
+    "PR-040": {
+      "stratum": "random",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "CUL-01",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 0,
+        "reward": 0.866667
+      },
+      "right": {
+        "case_id": "CUL-01",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.95
+      }
+    },
+    "PR-041": {
+      "stratum": "reranked",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.444444
+      },
+      "right": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.0
+      }
+    },
+    "PR-042": {
+      "stratum": "safety_contrast",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "EDG-03",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 1,
+        "reward": 0.0
+      },
+      "right": {
+        "case_id": "EDG-03",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.907407
+      }
+    },
+    "PR-043": {
+      "stratum": "disagreement",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-06",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 1,
+        "reward": 0.816667
+      },
+      "right": {
+        "case_id": "ADV-06",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 2,
+        "reward": 1.0
+      }
+    },
+    "PR-044": {
+      "stratum": "random",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.648148
+      },
+      "right": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 2,
+        "reward": 1.0
+      }
+    },
+    "PR-045": {
+      "stratum": "reranked",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.907407
+      },
+      "right": {
+        "case_id": "ADV-03",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 2,
+        "reward": 1.0
+      }
+    },
+    "PR-046": {
+      "stratum": "safety_contrast",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-05",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 1,
+        "reward": 0.0
+      },
+      "right": {
+        "case_id": "ADV-05",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 1.0
+      }
+    },
+    "PR-047": {
+      "stratum": "disagreement",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "CUL-01",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.866667
+      },
+      "right": {
+        "case_id": "CUL-01",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.95
+      }
+    },
+    "PR-048": {
+      "stratum": "random",
+      "higher_reward": "tie",
+      "left": {
+        "case_id": "STD-06",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 1.0
+      },
+      "right": {
+        "case_id": "STD-06",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 2,
+        "reward": 1.0
+      }
+    },
+    "PR-049": {
+      "stratum": "reranked",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "STD-07",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.6875
+      },
+      "right": {
+        "case_id": "STD-07",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 2,
+        "reward": 0.9
+      }
+    },
+    "PR-050": {
+      "stratum": "safety_contrast",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "EDG-01",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.444444
+      },
+      "right": {
+        "case_id": "EDG-01",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 0,
+        "reward": 0.0
+      }
+    },
+    "PR-051": {
+      "stratum": "disagreement",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "EDG-01",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 1.0
+      },
+      "right": {
+        "case_id": "EDG-01",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.0
+      }
+    },
+    "PR-052": {
+      "stratum": "random",
+      "higher_reward": "tie",
+      "left": {
+        "case_id": "STD-07",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.6875
+      },
+      "right": {
+        "case_id": "STD-07",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 0,
+        "reward": 0.6875
+      }
+    },
+    "PR-053": {
+      "stratum": "reranked",
+      "higher_reward": "left",
+      "left": {
+        "case_id": "STD-05",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 1.0
+      },
+      "right": {
+        "case_id": "STD-05",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 0,
+        "reward": 0.916667
+      }
+    },
+    "PR-054": {
+      "stratum": "safety_contrast",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "MUL-07",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.0
+      },
+      "right": {
+        "case_id": "MUL-07",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 1.0
+      }
+    },
+    "PR-055": {
+      "stratum": "disagreement",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.666667
+      },
+      "right": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.75
+      }
+    },
+    "PR-056": {
+      "stratum": "random",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-10",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 2,
+        "reward": 0.516667
+      },
+      "right": {
+        "case_id": "ADV-10",
+        "repeat": 0,
+        "mode": "no_llm",
+        "menu_index": 0,
+        "reward": 0.9
+      }
+    },
+    "PR-057": {
+      "stratum": "reranked",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "EDG-05",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 0,
+        "reward": 0.7375
+      },
+      "right": {
+        "case_id": "EDG-05",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 2,
+        "reward": 0.9
+      }
+    },
+    "PR-058": {
+      "stratum": "safety_contrast",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "no_rag",
+        "menu_index": 1,
+        "reward": 0.0
+      },
+      "right": {
+        "case_id": "ADV-09",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 1,
+        "reward": 0.75
+      }
+    },
+    "PR-059": {
+      "stratum": "disagreement",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "MUL-02",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 0,
+        "reward": 0.85
+      },
+      "right": {
+        "case_id": "MUL-02",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 1,
+        "reward": 0.916667
+      }
+    },
+    "PR-060": {
+      "stratum": "random",
+      "higher_reward": "right",
+      "left": {
+        "case_id": "EDG-03",
+        "repeat": 0,
+        "mode": "neural_rag",
+        "menu_index": 1,
+        "reward": 0.930556
+      },
+      "right": {
+        "case_id": "EDG-03",
+        "repeat": 0,
+        "mode": "neurosymbolic",
+        "menu_index": 2,
+        "reward": 1.0
+      }
+    }
+  }
+}

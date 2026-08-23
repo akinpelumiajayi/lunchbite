@@ -7,6 +7,12 @@ vectordb/
 # Benchmark results — generated output, not source
 benchmark/results/
 
+# feedback/ is deliberately NOT ignored. Benchmark results are regenerable by
+# re-running; hand-collected human ratings are not, and they are the primary
+# data behind the validation section of the report. Losing them means redoing
+# the sitting. Note responses_*.json carry an annotator name — a first name or
+# a pseudonym is intended, not anything further.
+
 # Test / tooling caches
 .pytest_cache/
 .ipynb_checkpoints/

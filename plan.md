@@ -43,7 +43,7 @@ pass and are marked as such; the plan text predates them.
 | 0.2 | Symmetric adversarial injection | already fixed |
 | 0.3 | Coverage / abstention-insensitive rates | already fixed |
 | 0.4 | Real neural embeddings (TF-IDF removed) | already fixed |
-| 0.5 | Judge quota root cause + circuit breaker | done (re-judge outstanding) |
+| 0.5 | Judge quota root cause + circuit breaker | done (clean re-judge landed, `run_20260819_222156`) |
 | 0.6 | `--repeats`, mean±SD, McNemar exact test | done |
 | 0.7 | `git init` + full history | done |
 | 0.8a | HitRate hardcoded to 1.0 | already fixed |
@@ -111,6 +111,31 @@ pass and are marked as such; the plan text predates them.
 - **The old judge numbers were biased optimistic, not merely imprecise:**
   faithfulness reported as 1.000 for neural_rag and neurosymbolic resolved to
   0.787 / 0.809 once the sample recovered from n≈3 to n=20–29.
+
+**Forced by the provider, 2026-08-17:** Groq shut down *both* models this project
+used on 2026-08-16 — `llama-3.1-8b-instant` (generator) and `llama-3.3-70b-versatile`
+(judge). Neither id is served any more, so every Groq run was broken, not just the
+judge pass. The defaults are now `GROQ_MODEL=qwen/qwen3.6-27b` and
+`GROQ_JUDGE_MODEL=openai/gpt-oss-120b`, which adopts §4.3's verdict for the judge and
+keeps the generator in a different family from it. Both are reasoning models, so each
+now carries a `reasoning_effort` (`none` for the generator, `low` for the judge — the
+accepted values differ per family, so the value is derived from the model id, not the
+role). Every number recorded before this date was produced by `llama-3.1-8b-instant`
+and is not comparable to a run made after it.
+
+**And the quota collapse moved to the generator.** qwen3.6-27b allows 200k tokens/day
+where llama-3.1-8b-instant allowed 500k, and Groq bills the *reserved* `max_tokens`.
+Measured over 29 generation calls spanning all five case categories: prompts 250–1907
+tokens (median ~550), completions 7–786. At the inherited `LLM_MAX_TOKENS=2000` a
+30-case run bills 90 x ~2562 = ~231k and dies around case 26 — precisely the §0.5
+failure, relocated. `LLM_MAX_TOKENS` is now **1200**: ~158k for a full run, 1.6x
+headroom over the longest menu JSON observed, and no truncation in a re-run of the
+longest cases. Verified on a 6-case subset (one per category): **0 JSON parse failures
+in 29 generation calls**, and a judge pass of **19 attempted / 19 ok / 0 parse_error**.
+Judge means on that subset behaved as the architecture predicts — faithfulness 0.89–0.97
+for the retrieval arms against **0.04 for `no_rag`** — which is evidence the new judge
+discriminates rather than simply scoring high, though it is not a substitute for the
+human κ still owed in §4.3.
 
 **Still outstanding:** a clean judge re-run at `JUDGE_MAX_TOKENS=450` on
 `gpt-oss-120b` (§4.3), human κ validation of the judge (§4.3), and the
@@ -212,7 +237,7 @@ backslashes on Windows, so the replace never matches and a full file path is pre
 Either way, `print_provider_status()` must report what is actually in use, not what the env
 var says.
 
-### 0.5 The judge collapsed to n≈3 — root-caused and fixed; a clean re-run is still outstanding
+### 0.5 The judge collapsed to n≈3 — root-caused, fixed, and closed by a clean re-run
 
 **Diagnosed.** The failures were never parse failures (`parse_error: 0` in every recorded run).
 They were HTTP 429s. `_try_groq` was shared by both roles, so the judge inherited
@@ -238,14 +263,16 @@ before the quota died.
   symbolic constraint layer does not meaningfully degrade recommendation quality" off **3 menus
   per arm**.
 
-**Still open:**
-- **A 95%-complete re-judge now exists, but is not yet the final one.** `gpt-oss-120b` scored
-  `run_20260814_084449` at `attempted 310 / ok 304 / parse_error 5 / call_error 1 / skipped 11`
-  (n=20–29 per metric, against n≈3 before). It fell 11 calls short only because it ran at
-  `JUDGE_MAX_TOKENS=600`; at 450 the budget fits a full 321-call run (§4.3). Re-run at 450, then
-  promote into `benchmark/results/`. Output currently parked outside the repo at
-  `$CLAUDE_JOB_DIR/tmp/rejudge_oss.json` — deliberately not written into `benchmark/results/`,
-  since it is not the final run.
+**Closed by `run_20260819_222156` (2026-08-19).** `gpt-oss-120b` scored the run at
+`attempted 117 / ok 115 / parse_error 2 / call_error 0 / skipped_quota_exhausted 0` — the
+first judge pass to lose nothing to quota. Coverage is n=30 / 30 / 29 / 26 per arm against
+n≈3 at the collapse. The call count fell from ~321 to 117 because the judge now scores all
+three dimensions in one call per menu rather than one call per dimension, which is what put
+a full pass inside the daily budget; the interim `JUDGE_MAX_TOKENS=450` plan was overtaken by
+that change. Results are in `benchmark/results/`, and the figures below are superseded by §3
+of `report/COMPARATIVE_REPORT_20260819_225747.md`.
+
+**Superseded figures**, kept for the record — these are the interim re-judge, not the final:
 - **The corrected numbers change the story, so nothing citing the old ones survives.**
 
   | mode | relevance | faithfulness | naturalness |
@@ -657,11 +684,28 @@ with no truncation, and converts the 95% run into a complete one. Same-family se
 is a *validity* threat an examiner will challenge; a few percent of sample is a *precision*
 issue that can simply be disclosed. Validity wins.
 
-**Then add `llama-3.3-70b` as a second judge and report inter-judge agreement.** Both now fit
-their independent per-model budgets, so this costs no extra quota. Two judges of different
-lineages agreeing is materially stronger than either alone, and disagreement is itself a
-finding. Record the judge model with every score (already wired via `_judge_model`), and treat
-human κ as the anchor for both — no judge swap substitutes for it.
+**Then add a second judge and report inter-judge agreement.** Each model has its own per-model
+budget, so this costs no extra quota. Two judges of different lineages agreeing is materially
+stronger than either alone, and disagreement is itself a finding. Record the judge model with
+every score (already wired via `_judge_model`), and treat human κ as the anchor for both — no
+judge swap substitutes for it.
+
+**Settled 2026-08-17 — but by the provider, not by this argument.** Groq shut down both llama
+models on 2026-08-16. The remaining chat models on the account are `openai/gpt-oss-120b`,
+`openai/gpt-oss-20b`, `qwen/qwen3.6-27b`, `groq/compound(-mini)` and `allam-2-7b`, so the
+generator had to move as well and the pair had to be chosen together. Adopted:
+`GROQ_MODEL=qwen/qwen3.6-27b` (Alibaba) generating, `GROQ_JUDGE_MODEL=openai/gpt-oss-120b`
+(OpenAI open-weight) judging at `JUDGE_MAX_TOKENS=450` — the verdict above, with the different
+family now on the generator side instead. Taking Groq's own recommended replacement for the
+generator (`gpt-oss-20b`) was rejected precisely because it would have put both roles in one
+family. Free-tier limits for the new pair are 30 RPM / 1K RPD / 8K TPM / 200K TPD; the TPD
+arithmetic above is unchanged, but 8K TPM now throttles throughput and a full run leans on the
+per-minute backoff in `evaluator._judge_call`. The second-judge idea is now constrained: the
+account offers no third independent family, so any second judge shares a lineage with either
+the generator (`qwen3.6-27b`) or the first judge (`gpt-oss-20b`). Agreement between two
+gpt-oss judges would measure scale sensitivity rather than independence, and a qwen second
+judge would be scoring its own family's output — either is reportable, but the limitation has
+to be stated rather than presented as two independent judges.
 
 ### 4.4 Adversarial injections flow into the judge prompt
 

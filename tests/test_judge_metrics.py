@@ -48,9 +48,12 @@ def case(case_id, *, modes, repeat=0):
 def reset_judge_state():
     """JUDGE_STATS and the quota breaker are module-level; leaking them between
     tests would make failures order-dependent."""
-    evaluator.JUDGE_STATS.update({k: 0 for k in evaluator.JUDGE_STATS})
-    evaluator._QUOTA_EXHAUSTED["hit"] = False
-    evaluator._QUOTA_EXHAUSTED["detail"] = ""
+    # Not a blanket zero-fill: JUDGE_STATS carries `last_error` as a string, and
+    # setting it to 0 would only work by accident of 0 being falsy.
+    evaluator.JUDGE_STATS.update(
+        {k: ("" if isinstance(v, str) else 0) for k, v in evaluator.JUDGE_STATS.items()})
+    evaluator.JUDGE_QUOTA.reset()
+    evaluator.AUTH_FAILED.reset()
     yield
 
 

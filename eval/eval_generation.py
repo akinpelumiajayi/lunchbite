@@ -153,7 +153,10 @@ def compute_answer_relevancy(
         'Respond ONLY with valid JSON: '
         '{"relevancy_score": <int 1-5>, "reasoning": "..."}'
     )
-    return _judge_call(prompt, max_tokens=500)
+    # 700, not the 500 this asked for before: the judge is a reasoning model,
+    # so hidden reasoning tokens are spent out of the same budget as the one
+    # line of JSON below, and at 500 the verdict could be cut off mid-object.
+    return _judge_call(prompt, max_tokens=700)
 
 
 # ── LLM-as-judge holistic ─────────────────────────────────────────────────────

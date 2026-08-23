@@ -302,7 +302,19 @@ faithfulness scoring mechanism is genuinely sensitive.
 | Neuro-symbolic allergen violation rate | 0.0% | MOCK BENCHMARK |
 | Baseline adversarial bypass rate | 66.7% | MOCK BENCHMARK |
 | Neuro-symbolic adversarial bypass rate | 0.0% | MOCK BENCHMARK |
-| Relevance / Faithfulness / Naturalness | Not yet populated | Requires `GROQ_API_KEY` |
+| Relevance (neural_rag / neurosymbolic) | 4.833 / 4.483 | REAL (`run_20260819_222156`) |
+| Faithfulness (neural_rag / neurosymbolic) | 0.949 / 0.917 | REAL (`run_20260819_222156`) |
+| Naturalness (neural_rag / neurosymbolic) | 4.933 / 4.828 | REAL (`run_20260819_222156`) |
 | Safety integration tests | 4/4 pass | REAL |
 
-To get real (non-mock) benchmark numbers: `python3 run_all.py --groq-key gsk_...`
+The four MOCK BENCHMARK rows above predate the live runs and are kept only as the
+simulated-LLM reference; the live safety figures are in §2 of the latest
+`report/COMPARATIVE_REPORT_*.md`.
+
+To get real (non-mock) benchmark numbers, set `GROQ_API_KEY=gsk_...` in `.env` (there is no
+`--groq-key` flag — the key is read from the environment) and run:
+
+```bash
+python3 run_all.py                    # auto-detects Groq or Ollama from .env
+python3 run_all.py --provider ollama  # local, no key needed
+```

@@ -172,14 +172,19 @@ def test_zero_safe_candidates_never_calls_the_llm():
     """The cheapest safety property in the system: if nothing survives the
     pre-filter there is nothing to generate from, and the LLM is not given the
     chance to invent something."""
-    # Deliberately over-constrained rather than relying on a specific pair of
-    # restrictions excluding the corpus — that assumption broke once already
-    # when the corpus grew from 9 recipes to 29.
+    # Emptied by an explicit ceiling, not by an allergen shotgun. Listing every
+    # allergen is corpus-dependent and has broken twice: once when the corpus
+    # grew from 9 recipes to 29, and again when the band nutrition gate became
+    # advisory and Black Beans and Rice — which declares no allergen at all —
+    # started surviving it. A caller-set ceiling is enforced in every gate mode
+    # (guardrails.nutrition_gate) and no recipe has 0 g of sugar, so the pool is
+    # empty however the corpus changes.
     profile = ChildProfile(
         age_years=7,
         allergies=["fish", "milk", "egg", "gluten", "soya", "peanut", "sesame"],
         intolerances=["celery", "mustard", "lupin", "molluscs", "crustaceans"],
         school_nut_free=True,
+        max_sugar_g_override=0.0,
     )
     llm = mock_llm({"menu_options": [menu("recipe_001")]})
     state = run(profile, llm)
@@ -188,3 +193,20 @@ def test_zero_safe_candidates_never_calls_the_llm():
     llm.invoke.assert_not_called()
     assert state["final_menus"] == []
     assert state["generation_error"] == "No candidates available for generation."
+
+
+# ── 6. per-child ceilings survive the graph ──────────────────────────────────
+
+def test_profile_nutrition_overrides_reach_the_prefilter():
+    """
+    `_profile_from_dict` rebuilds a ChildProfile from the state dict, and it
+    used to drop both override fields — so a ceiling documented as tunable per
+    child was enforced in unit tests and inert in every actual pipeline.
+    """
+    generous = run(ChildProfile(age_years=9, max_sugar_g_override=500.0),
+                   mock_llm({"menu_options": []}))
+    strict = run(ChildProfile(age_years=9, max_sugar_g_override=0.0),
+                 mock_llm({"menu_options": []}))
+
+    assert approved_ids(generous), "a 500 g ceiling should exclude nothing"
+    assert approved_ids(strict) == [], "a 0 g ceiling should exclude everything"

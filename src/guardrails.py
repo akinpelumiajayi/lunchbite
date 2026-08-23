@@ -34,6 +34,92 @@ def lunch_fraction() -> float:
         return DEFAULT_LUNCH_FRACTION
     return value if 0.0 < value <= 1.0 else DEFAULT_LUNCH_FRACTION
 
+
+NUTRITION_GATE_MODES = ("advisory", "hard", "off")
+DEFAULT_NUTRITION_GATE = "advisory"
+
+
+def nutrition_gate() -> str:
+    """
+    What a band-derived sugar/salt ceiling does when a recipe exceeds it:
+
+      advisory (default) -- record it as a warning; the recipe still reaches the
+                            LLM, and the warning travels with it
+      hard               -- reject the recipe, as an allergen hit does
+      off                -- do not check band ceilings at all
+
+    Why advisory is the default
+    ---------------------------
+    Two independent defects make a *hard* band ceiling reject safe food:
+
+    1. Unit mismatch. The recipe field is `sugars_g` -- TOTAL sugars -- and the
+       guideline field is `free_sugars_g_day_max`. Lactose in yoghurt and
+       fructose in fruit count toward the first and explicitly not the second,
+       so every fruit- or dairy-containing lunch is charged sugar it does not
+       owe. NHS recipe_001, a cheesy coleslaw pitta from the UK government
+       lunchbox booklet, is rejected at age 7 on 10.1 g of mostly-vegetable
+       sugar.
+
+    2. Unreliable source data. eval/check_data_quality.py finds savoury dishes
+       carrying 44 g of sugar and round placeholder values repeated across
+       unrelated recipes. Nine UK Gov recipes median 4.4 g; twenty PACK-IT
+       recipes median 28.5 g, at comparable energy.
+
+    Together these rejected 21 of 29 recipes at age 7-10 on sugar alone --
+    before a single allergen was considered. Measured over the 2026-08-18 run:
+    161 of 199 pre-filter rejections were nutrition, not allergens; they dragged
+    pre-filter precision to 0.477 and left 5 cases with zero safe candidates.
+    Gating on allergens alone takes precision to 0.939 and zero-candidate cases
+    to 0.
+
+    The distinction being drawn is between *unsafe* and *less ideal*. An
+    allergen in a recipe can hospitalise the child it is served to, and no
+    prompt may bypass that gate. A lunch above a per-meal sugar guideline is a
+    nutrition-quality judgement, and suppressing it entirely is what starves the
+    generator of options. So it is surfaced, not enforced.
+
+    Set NUTRITION_GATE=hard once the corpus carries free-sugar figures that
+    eval/check_data_quality.py passes clean. A ceiling set explicitly by the
+    caller (`max_sugar_g_override` / `max_salt_g_override` on ChildProfile) is
+    always enforced regardless of this setting -- it is a deliberate instruction
+    about one child, not an inference from suspect corpus data.
+    """
+    value = os.environ.get("NUTRITION_GATE", DEFAULT_NUTRITION_GATE).strip().lower()
+    return value if value in NUTRITION_GATE_MODES else DEFAULT_NUTRITION_GATE
+
+
+DIET_GATE_MODES = ("hard", "advisory", "off")
+DEFAULT_DIET_GATE = "hard"
+
+
+def diet_gate() -> str:
+    """
+    What a diet-requirement miss does: reject (`hard`, the default), warn
+    (`advisory`), or nothing (`off`). Override with DIET_GATE in .env.
+
+    Why this defaults to `hard` where NUTRITION_GATE defaults to `advisory`
+    ----------------------------------------------------------------------
+    The nutrition gate is advisory because its *data* is unreliable -- total
+    sugars compared against a free-sugars guideline, on corpus figures that
+    check_data_quality.py already flags. Nothing is wrong with the diet data:
+    every one of the 29 recipes carries `diet_tags`, and the exclusions below
+    are read from the ingredient list, the same field the allergen keyword scan
+    trusts. A vegetarian profile served chicken is a plain failure to honour a
+    stated requirement, not a judgement call about food quality.
+
+    What this gate does NOT claim
+    -----------------------------
+    For `halal` and `kosher` it enforces *ingredient exclusions only* -- pork
+    and its derivatives, plus shellfish for kosher. It cannot speak to slaughter
+    method, certification, utensil separation, or the meat-and-dairy rule, none
+    of which are represented anywhere in the corpus. Those requirements are
+    marked non-certifiable below and always attach a warning saying so, because
+    a system that answered "kosher: passed" off an ingredient scan would be
+    making a claim it cannot support.
+    """
+    value = os.environ.get("DIET_GATE", DEFAULT_DIET_GATE).strip().lower()
+    return value if value in DIET_GATE_MODES else DEFAULT_DIET_GATE
+
 ALLERGEN_KEYWORDS: Dict[str, List[str]] = {
     "cereals containing gluten": ["wheat", "barley", "rye", "oat", "spelt", "khorasan",
                                    "gluten", "bread", "pasta", "pitta", "bagel", "bap", "wrap", "flour"],
@@ -167,6 +253,122 @@ def normalize_allergy_terms_with_unknowns(
     return normalized, unknown
 
 
+# ── Diet requirements ─────────────────────────────────────────────────────────
+#
+# Diet compliance used to be carried only in `cultural_context` -- free text that
+# reached the generator's prompt and nothing else. That put halal, kosher and
+# vegetarian on exactly the footing this project exists to argue against: the
+# model was asked to honour them, and nothing checked that it had.
+
+DIET_SYNONYMS: Dict[str, str] = {
+    "veggie": "vegetarian",
+    "meat-free": "vegetarian",
+    "meat free": "vegetarian",
+    "no meat": "vegetarian",
+    "vegetarian household": "vegetarian",
+    "plant-based": "vegan",
+    "plant based": "vegan",
+    "vegan-friendly": "vegan",
+    "vegan household": "vegan",
+    "pescetarian": "pescatarian",
+    "halal diet": "halal",
+    "kosher diet": "kosher",
+}
+
+_MEAT_TERMS = [
+    "pork", "bacon", "ham", "gammon", "lard", "gelatin", "gelatine", "chicken",
+    "beef", "turkey", "lamb", "mutton", "veal", "venison", "sausage",
+    "pepperoni", "salami", "prosciutto", "chorizo", "meat",
+]
+_FISH_TERMS = [
+    "fish", "tuna", "salmon", "cod", "haddock", "mackerel", "sardine",
+    "anchovy", "prawn", "shrimp", "crab", "lobster", "shellfish",
+]
+_PORK_TERMS = [
+    "pork", "bacon", "ham", "gammon", "lard", "gelatin", "gelatine",
+    "pepperoni", "salami", "prosciutto", "chorizo",
+]
+_SHELLFISH_TERMS = [
+    "prawn", "shrimp", "crab", "lobster", "shellfish", "clam", "oyster",
+    "mussel", "scallop",
+]
+
+# `tags`       -- corpus diet_tags that satisfy the requirement; None means the
+#                 corpus does not label this diet, so only exclusions apply.
+# `excludes`   -- ingredient terms that violate it.
+# `allergens`  -- canonical allergens whose presence violates it, read from the
+#                 recipe's tagged allergen list rather than its prose.
+# `certifiable`-- False when the check is necessarily partial; a warning saying
+#                 so is attached on every pass, not just on failures.
+DIET_SPECS: Dict[str, Dict[str, Any]] = {
+    "vegetarian": {
+        "tags": {"vegetarian", "vegan-friendly"},
+        "excludes": _MEAT_TERMS + _FISH_TERMS,
+        "allergens": set(),
+        "certifiable": True,
+    },
+    "vegan": {
+        "tags": {"vegan-friendly"},
+        "excludes": _MEAT_TERMS + _FISH_TERMS,
+        "allergens": {"milk", "egg"},
+        "certifiable": True,
+    },
+    "pescatarian": {
+        "tags": {"pescatarian", "vegetarian", "vegan-friendly"},
+        "excludes": _MEAT_TERMS,
+        "allergens": set(),
+        "certifiable": True,
+    },
+    "halal": {
+        "tags": None,
+        "excludes": _PORK_TERMS,
+        "allergens": set(),
+        "certifiable": False,
+    },
+    "kosher": {
+        "tags": None,
+        "excludes": _PORK_TERMS + _SHELLFISH_TERMS,
+        "allergens": set(),
+        "certifiable": False,
+    },
+}
+
+
+def normalize_diet_terms(raw_terms: List[str]) -> Tuple[Set[str], List[str]]:
+    """
+    Map free-text diet terms onto the vocabulary above.
+
+    Returns (recognised, unknown). An unrecognised term is NOT silently enforced
+    the way an unknown allergy term is -- there is no ingredient list to match it
+    against -- so it is returned for the caller to surface as a warning. Claiming
+    to honour a diet nobody implemented is the failure mode being avoided here.
+    """
+    recognised: Set[str] = set()
+    unknown: List[str] = []
+    for term in raw_terms:
+        t = term.strip().lower()
+        if not t:
+            continue
+        if t in DIET_SYNONYMS:
+            recognised.add(DIET_SYNONYMS[t])
+        elif t in DIET_SPECS:
+            recognised.add(t)
+        else:
+            hit = next((d for d in DIET_SPECS if d in t), None)
+            syn = next((v for k, v in DIET_SYNONYMS.items() if k in t), None)
+            if hit:
+                recognised.add(hit)
+            elif syn:
+                recognised.add(syn)
+            else:
+                unknown.append(t)
+    # vegan is stricter than vegetarian; enforcing both would double-report the
+    # same miss, so the stricter one stands alone.
+    if "vegan" in recognised:
+        recognised.discard("vegetarian")
+    return recognised, unknown
+
+
 @dataclass
 class ChildProfile:
     age_years: int
@@ -176,6 +378,7 @@ class ChildProfile:
     likes: List[str] = field(default_factory=list)
     school_nut_free: bool = False
     cultural_context: str = ""
+    diet_requirements: List[str] = field(default_factory=list)
     max_sugar_g_override: Optional[float] = None
     max_salt_g_override: Optional[float] = None
 
@@ -186,12 +389,29 @@ class ChildProfile:
             restricted.add("peanut")
         return restricted
 
+    def required_diets(self) -> Tuple[Set[str], List[str]]:
+        """
+        Recognised diet requirements and any terms that could not be mapped.
+
+        `cultural_context` is read as well as the explicit list: existing
+        benchmark profiles carry "vegetarian household" and "halal diet required
+        - no pork products" there, and a requirement that was already being
+        stated should not need restating to be enforced.
+        """
+        return normalize_diet_terms(self.diet_requirements + [self.cultural_context])
+
 
 @dataclass
 class GuardrailResult:
     passed: bool
     reasons_for_rejection: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
+    # Band-ceiling breaches on their own, so a caller can tell a
+    # nutrition-quality note from an allergen near-miss without parsing prose.
+    # Populated in every gate mode except "off". The same strings also appear in
+    # `warnings` under an advisory gate and in `reasons_for_rejection` under a
+    # hard one — never in both, since a rejection is not a warning.
+    nutrition_flags: List[str] = field(default_factory=list)
 
 
 @lru_cache(maxsize=1)
@@ -229,6 +449,8 @@ def check_recipe_against_profile(recipe: Dict[str, Any], profile: ChildProfile) 
     """Core deterministic gate. Pure function — no LLM, no side effects."""
     reasons: List[str] = []
     warnings: List[str] = []
+    nutrition_flags: List[str] = []
+    gate = nutrition_gate()
 
     restricted = profile.all_restricted_allergens()
     _, unknown_terms = normalize_allergy_terms_with_unknowns(
@@ -266,6 +488,48 @@ def check_recipe_against_profile(recipe: Dict[str, Any], profile: ChildProfile) 
         if ("nuts" in recipe_allergens or "peanut" in recipe_allergens) and not nut_flagged:
             reasons.append("Violates school nut-free policy.")
 
+    # ── Diet requirements ────────────────────────────────────────────────────
+    d_gate = diet_gate()
+    if d_gate != "off":
+        diets, unknown_diets = profile.required_diets()
+        if unknown_diets:
+            warnings.append(
+                f"Unrecognised diet requirement(s): {', '.join(sorted(unknown_diets))}. "
+                f"Not in the diet vocabulary, so these are NOT enforced — check manually."
+            )
+        recipe_tags = {t.lower() for t in recipe.get("diet_tags", [])}
+        diet_text = " ".join(recipe.get("ingredients", [])).lower()
+
+        for diet in sorted(diets):
+            spec = DIET_SPECS[diet]
+            misses: List[str] = []
+
+            # The corpus tag is authoritative where it exists: it is curated per
+            # recipe, where the scan below only sees whatever the ingredient
+            # prose happens to name.
+            if spec["tags"] is not None and not (recipe_tags & spec["tags"]):
+                misses.append(f"not tagged {' or '.join(sorted(spec['tags']))}")
+
+            bad_allergens = sorted(spec["allergens"] & recipe_allergens)
+            if bad_allergens:
+                misses.append(f"contains {', '.join(bad_allergens)}")
+
+            for kw in spec["excludes"]:
+                if keyword_hit(diet_text, kw, diet):
+                    misses.append(f"ingredients contain '{kw}'")
+                    break
+
+            if misses:
+                msg = f"Does not meet '{diet}' requirement: {'; '.join(misses)}."
+                (reasons if d_gate == "hard" else warnings).append(msg)
+
+            if not spec["certifiable"]:
+                warnings.append(
+                    f"'{diet}' is checked as an ingredient exclusion only. Certification, "
+                    f"slaughter method and preparation separation are not represented in "
+                    f"the corpus and are NOT verified."
+                )
+
     extras_text = " ".join(recipe.get("extras_suggested", [])).lower()
     for allergen in restricted:
         for kw in ALLERGEN_KEYWORDS.get(allergen, [allergen]):
@@ -279,41 +543,82 @@ def check_recipe_against_profile(recipe: Dict[str, Any], profile: ChildProfile) 
     band = _load_age_band_limits(profile.age_years)
     nutrition = recipe.get("nutrition_per_serving", {})
 
-    if band is None:
-        warnings.append(f"Age {profile.age_years} outside supported 4-18 range; nutrition limits not checked.")
-    else:
-        daily_sugar = band["free_sugars_g_day_max"]
-        daily_salt = band["salt_g_day_max"]
-        display_sugar = min(daily_sugar.values()) if isinstance(daily_sugar, dict) else daily_sugar
-        display_salt = min(daily_salt.values()) if isinstance(daily_salt, dict) else daily_salt
+    # `is not None`, not `or`: an override of 0.0 is falsy and was silently
+    # discarded, falling back to the default ceiling — the opposite of intent.
+    sugar_is_explicit = profile.max_sugar_g_override is not None
+    salt_is_explicit = profile.max_salt_g_override is not None
 
-        # `is not None`, not `or`: an override of 0.0 is falsy and was silently
-        # discarded, falling back to the default ceiling — the opposite of intent.
-        sugar_limit = (profile.max_sugar_g_override if profile.max_sugar_g_override is not None
-                       else _daily_to_lunch_fraction(daily_sugar))
-        salt_limit = (profile.max_salt_g_override if profile.max_salt_g_override is not None
-                      else _daily_to_lunch_fraction(daily_salt))
+    # "off" suppresses the band-derived ceilings only. A ceiling the caller set
+    # for this child is an instruction about one child rather than an inference
+    # from the corpus, so it survives every gate mode.
+    check_band = gate != "off" and band is not None
+    check_explicit = sugar_is_explicit or salt_is_explicit
+
+    if gate != "off" and band is None:
+        warnings.append(f"Age {profile.age_years} outside supported 4-18 range; nutrition limits not checked.")
+
+    if check_band or check_explicit:
+        daily_sugar = band["free_sugars_g_day_max"] if band else None
+        daily_salt = band["salt_g_day_max"] if band else None
+        display_sugar = (min(daily_sugar.values()) if isinstance(daily_sugar, dict)
+                         else daily_sugar)
+        display_salt = (min(daily_salt.values()) if isinstance(daily_salt, dict)
+                        else daily_salt)
+
+        # None means "no ceiling applies" — an unchecked nutrient, not a zero one.
+        sugar_limit = (profile.max_sugar_g_override if sugar_is_explicit
+                       else _daily_to_lunch_fraction(daily_sugar) if check_band else None)
+        salt_limit = (profile.max_salt_g_override if salt_is_explicit
+                      else _daily_to_lunch_fraction(daily_salt) if check_band else None)
 
         recipe_sugar = nutrition.get("sugars_g")
         recipe_salt = nutrition.get("salt_g")
 
-        if recipe_sugar is not None and recipe_sugar > sugar_limit:
-            reasons.append(
+        pct = int(round(lunch_fraction() * 100))
+
+        if sugar_limit is not None and recipe_sugar is not None and recipe_sugar > sugar_limit:
+            note = (
                 f"Sugar content ({recipe_sugar}g) exceeds per-lunch ceiling "
-                f"({sugar_limit}g, ~40% of {display_sugar}g daily max for age {profile.age_years})."
+                f"({sugar_limit}g, ~{pct}% of {display_sugar}g daily max for age "
+                f"{profile.age_years})."
             )
-        elif recipe_sugar is not None and recipe_sugar > sugar_limit * 0.85:
-            warnings.append(f"Sugar content ({recipe_sugar}g) is near the per-lunch ceiling ({sugar_limit}g).")
+            if sugar_is_explicit:
+                reasons.append(note)
+            else:
+                nutrition_flags.append(note)
+        elif sugar_limit is not None and recipe_sugar is not None and recipe_sugar > sugar_limit * 0.85:
+            nutrition_flags.append(
+                f"Sugar content ({recipe_sugar}g) is near the per-lunch ceiling ({sugar_limit}g).")
 
-        if recipe_salt is not None and recipe_salt > salt_limit:
-            reasons.append(
+        if salt_limit is not None and recipe_salt is not None and recipe_salt > salt_limit:
+            note = (
                 f"Salt content ({recipe_salt}g) exceeds per-lunch ceiling "
-                f"({salt_limit}g, ~40% of {display_salt}g daily max for age {profile.age_years})."
+                f"({salt_limit}g, ~{pct}% of {display_salt}g daily max for age "
+                f"{profile.age_years})."
             )
-        elif recipe_salt is not None and recipe_salt > salt_limit * 0.85:
-            warnings.append(f"Salt content ({recipe_salt}g) is near the per-lunch ceiling ({salt_limit}g).")
+            if salt_is_explicit:
+                reasons.append(note)
+            else:
+                nutrition_flags.append(note)
+        elif salt_limit is not None and recipe_salt is not None and recipe_salt > salt_limit * 0.85:
+            nutrition_flags.append(
+                f"Salt content ({recipe_salt}g) is near the per-lunch ceiling ({salt_limit}g).")
 
-    return GuardrailResult(passed=len(reasons) == 0, reasons_for_rejection=reasons, warnings=warnings)
+    if gate == "hard":
+        # Only the band-derived flags land here; a breach of an explicit override
+        # was appended to `reasons` above, so this cannot duplicate one. They are
+        # not also copied into `warnings` — a rejection is not a warning, and a
+        # caller listing both would print each breach twice.
+        reasons.extend(nutrition_flags)
+    else:
+        warnings.extend(nutrition_flags)
+
+    return GuardrailResult(
+        passed=len(reasons) == 0,
+        reasons_for_rejection=reasons,
+        warnings=warnings,
+        nutrition_flags=nutrition_flags,
+    )
 
 
 def filter_recipes(
@@ -325,6 +630,7 @@ def filter_recipes(
         if result.passed:
             r_copy = dict(r)
             r_copy["_guardrail_warnings"] = result.warnings
+            r_copy["_nutrition_flags"] = result.nutrition_flags
             accepted.append(r_copy)
         else:
             rejected.append({"recipe_name": r.get("name", "unknown"), "reasons": result.reasons_for_rejection})

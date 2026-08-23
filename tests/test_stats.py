@@ -318,3 +318,70 @@ def test_paired_diff_with_no_overlap_is_undecidable_not_negative():
     d = paired_score_diff(records, "neurosymbolic", "neural_rag", "relevance")
     assert d["n_pairs"] == 0
     assert d["excludes_zero"] is None
+
+
+# ── failed case-runs must not be paired ──────────────────────────────────────
+#
+# The 2026-08-18 run is the case in point: the generator's daily token budget ran
+# out at case 19, so `neural_rag` produced a scored outcome for 17 of 30 cases.
+# `case_violated` tested only `error`, which the runner sets when the *graph*
+# raises — a dead LLM call is caught inside the generate node and surfaces as
+# `generation_error`. All 13 dead runs were therefore paired as safe refusals,
+# and McNemar reported 30 pairs when it had 17.
+
+def _row(case_id, **modes):
+    row = {"case_id": case_id, "expected_unsafe_ids": ["recipe_bad"]}
+    row.update(modes)
+    return row
+
+
+ANSWERED_SAFE = {"final_menus": [{"recipe_id": "recipe_ok"}],
+                 "generation_candidates": [{"id": "recipe_ok"}]}
+ANSWERED_UNSAFE = {"final_menus": [{"recipe_id": "recipe_bad"}],
+                   "generation_candidates": [{"id": "recipe_bad"}]}
+QUOTA_DEAD = {"final_menus": [], "generation_candidates": [{"id": "recipe_ok"}],
+              "generation_error": "LLM daily quota exhausted: TPD"}
+DELIBERATE_REFUSAL = {"final_menus": [], "generation_candidates": [],
+                      "generation_error": "No candidates available for generation."}
+
+
+def test_a_dead_llm_call_has_no_safety_outcome():
+    assert case_violated(_row("X", neural_rag=QUOTA_DEAD), "neural_rag") is None
+
+
+def test_a_deliberate_refusal_is_a_scored_safe_outcome():
+    """The pre-filter removing every candidate is the system working, not failing —
+    it is the behaviour the whole neuro-symbolic claim rests on, so it must stay
+    in the sample rather than being discarded alongside the outages."""
+    assert case_violated(_row("X", neurosymbolic=DELIBERATE_REFUSAL), "neurosymbolic") is False
+
+
+def test_a_raised_graph_error_has_no_safety_outcome():
+    assert case_violated(_row("X", neural_rag={"error": "Timeout"}), "neural_rag") is None
+
+
+def test_mcnemar_pairs_only_the_cases_both_arms_scored():
+    results = [
+        _row("C1", neurosymbolic=ANSWERED_SAFE, no_rag=ANSWERED_UNSAFE),
+        _row("C2", neurosymbolic=ANSWERED_SAFE, no_rag=ANSWERED_UNSAFE),
+        # no_rag died here; the pair does not exist and must not be invented.
+        _row("C3", neurosymbolic=ANSWERED_SAFE, no_rag=QUOTA_DEAD),
+    ]
+    m = mcnemar(results, "neurosymbolic", "no_rag")
+
+    assert m["n_paired_cases"] == 2, "the dead case is not a pair"
+    assert m["n_cases_a"] == 3 and m["n_cases_b"] == 2
+    assert m["a_safe_b_unsafe"] == 2 and m["a_unsafe_b_safe"] == 0
+
+
+def test_paired_violation_counts_are_taken_over_the_shared_set():
+    """The report prints these next to the p-value, so they have to be counted
+    over the same cases the test used — not over each arm's own total."""
+    results = [
+        _row("C1", neurosymbolic=ANSWERED_SAFE, no_rag=ANSWERED_UNSAFE),
+        _row("C2", neurosymbolic=QUOTA_DEAD, no_rag=ANSWERED_UNSAFE),
+    ]
+    m = mcnemar(results, "neurosymbolic", "no_rag")
+
+    assert m["b_violations"] == 2, "no_rag was unsafe in both cases it scored"
+    assert m["b_violations_paired"] == 1, "but only one of those was a pair"
