@@ -29,7 +29,8 @@ from functools import lru_cache
 
 from rank_bm25 import BM25Okapi
 from state import PipelineState, RetrievedCandidate, MenuOption
-from document_loader import ALL_14_ALLERGENS, _load_json, load_recipe_chunks
+from document_loader import (ALL_14_ALLERGENS, _load_json, load_recipe_chunks,
+                             recipes_by_id)
 from guardrails import ChildProfile, check_recipe_against_profile
 from json_parsing import parse_menu_response
 from rate_limit import (AUTH_FAILED, GENERATOR_QUOTA, is_auth_failure,
@@ -59,9 +60,9 @@ _bm25_cache: Dict[str, Any] = {}
 # These were re-read from disk on every node invocation, so a single benchmark
 # case re-parsed recipes.json roughly a dozen times.
 
-@lru_cache(maxsize=1)
 def _recipes_by_id() -> Dict[str, Dict[str, Any]]:
-    return {r["id"]: r for r in _load_json("recipes.json")}
+    """Delegates to document_loader so the app and the graph share one index."""
+    return recipes_by_id()
 
 
 @lru_cache(maxsize=1)

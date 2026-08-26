@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Any, Dict, List
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
@@ -39,6 +40,21 @@ def _load_json(filename: str) -> Any:
     path = os.path.join(DATA_DIR, filename)
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+@lru_cache(maxsize=1)
+def recipes_by_id() -> Dict[str, Dict[str, Any]]:
+    """
+    The recipe corpus indexed by `id`, parsed once per process.
+
+    A `MenuOption` carries only a `recipe_id`; ingredients, nutrition, cost and
+    provenance all live here. Anything joining a pipeline result back onto the
+    corpus goes through this rather than re-reading the file or reaching for a
+    private helper in another module.
+
+    The returned dict is shared and cached -- treat it as read-only.
+    """
+    return {r["id"]: r for r in _load_json("recipes.json")}
 
 
 def load_recipe_chunks() -> List[Chunk]:

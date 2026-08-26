@@ -49,6 +49,13 @@ matplotlib>=3.8.0
 scipy>=1.9.0
 scikit-learn>=1.3.0
 
+# ── Dashboard (app/LunchBite.py) ───────────────────────────────
+# `streamlit run app/LunchBite.py`. pandas and altair arrive with it, so the
+# dashboard's charts and tables add no further declared dependency. Not needed
+# by the benchmark, the eval harness or the CLI — nothing under src/ imports it.
+#   1.40 is the floor: st.toggle, and `width=` on button/dataframe/altair_chart.
+streamlit>=1.40.0
+
 # ── Tests (pytest tests/) ────────────────────────────────────────────────────
 pytest>=8.0.0
 

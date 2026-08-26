@@ -445,6 +445,50 @@ def _daily_to_lunch_fraction(daily_value: Any, fraction: Optional[float] = None)
     return round(float(daily_value) * fraction, 1)
 
 
+def _band_label(age_years: int) -> str:
+    """The nutrition_guidelines.json band key covering this age, for attribution."""
+    for lo, hi in ((4, 6), (7, 10), (11, 14), (15, 18)):
+        if lo <= age_years <= hi:
+            return f"age_{lo}_{hi}"
+    return "unsupported"
+
+
+def lunch_limits_for_age(age_years: int) -> Optional[Dict[str, Any]]:
+    """
+    The per-lunch nutrient ceilings check_recipe_against_profile applies, plus
+    the guideline kcal target, exposed for display.
+
+    Returns None outside the 4-18 range the corpus covers -- the same condition
+    under which the gate stops checking bands and warns instead. Callers must
+    read None as "not checked", never as "a ceiling of zero".
+
+    The sugar figure is a *free sugars* ceiling being compared against the
+    corpus's *total* sugars, which is why breaching it is advisory by default
+    (see nutrition_gate). `band_label` names the band the numbers came from so a
+    caller can attribute them rather than present them as universal.
+    """
+    band = _load_age_band_limits(age_years)
+    if band is None:
+        return None
+
+    fraction = lunch_fraction()
+    daily_sugar = band["free_sugars_g_day_max"]
+    daily_salt = band["salt_g_day_max"]
+
+    return {
+        "sugars_g": _daily_to_lunch_fraction(daily_sugar, fraction),
+        "salt_g": _daily_to_lunch_fraction(daily_salt, fraction),
+        # Most conservative of the sexes, matching the gate's own convention.
+        "daily_sugars_g": (min(daily_sugar.values())
+                           if isinstance(daily_sugar, dict) else daily_sugar),
+        "daily_salt_g": (min(daily_salt.values())
+                         if isinstance(daily_salt, dict) else daily_salt),
+        "kcal_target": band.get("approx_lunch_target_kcal"),
+        "fraction": fraction,
+        "band_label": _band_label(age_years),
+    }
+
+
 def check_recipe_against_profile(recipe: Dict[str, Any], profile: ChildProfile) -> GuardrailResult:
     """Core deterministic gate. Pure function — no LLM, no side effects."""
     reasons: List[str] = []

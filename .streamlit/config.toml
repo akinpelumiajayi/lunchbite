@@ -1,0 +1,32 @@
+# LunchBite's Streamlit configuration.
+#
+# The theme is pinned light on purpose. The chart palette in
+# app/lunchbite/theme.py is validated for colour-vision-deficiency separation
+# against a light surface (#fcfcfb); a dark theme is a different set of steps
+# validated against a different surface, not an automatic inversion of this one.
+# Rather than ship an unvalidated dark mode, LunchBite commits to the light one
+# it can vouch for.
+
+[theme]
+base = "light"
+primaryColor = "#2a78d6"
+backgroundColor = "#fcfcfb"
+secondaryBackgroundColor = "#f2f1ec"
+textColor = "#0b0b0b"
+
+[browser]
+gatherUsageStats = false
+
+[server]
+# The app reads data/ and vectordb/ from the repo root and writes nothing.
+
+# Watching is off, and it has to be. Streamlit's local sources watcher walks
+# every loaded module looking for paths to watch. `transformers` -- pulled in by
+# sentence-transformers for the embedding model and the cross-encoder -- resolves
+# its submodules lazily through a module-level __getattr__, so merely asking each
+# one for __path__ imports the entire library, several hundred modules including
+# ones that need torchvision. First render hung for minutes and filled the log
+# with ModuleNotFoundError tracebacks from packages this project never uses.
+#
+# The cost is that editing a file no longer reloads the app; restart the server.
+fileWatcherType = "none"
