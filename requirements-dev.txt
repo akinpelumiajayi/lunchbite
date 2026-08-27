@@ -1,0 +1,21 @@
+# Development-only dependencies: notebooks, plots and tests.
+#
+# Deliberately NOT in requirements.txt, because that file is what Streamlit
+# Community Cloud installs and the deployed app imports none of this. Jupyter
+# alone brings in roughly forty packages; on a cloud builder that is install
+# time and disk spent on code that never runs.
+#
+#   pip install -r requirements.txt -r requirements-dev.txt
+
+# ── Jupyter notebook ──────────────────────────────────────────────────────────
+notebook>=7.0.0
+ipykernel>=6.0.0
+nbconvert>=7.0.0
+
+# ── Charts (notebooks/lunch_rag_pipeline.ipynb) ──────────────────────────────
+# The dashboard's charts are Altair, which arrives with Streamlit. matplotlib is
+# only the notebook's.
+matplotlib>=3.8.0
+
+# ── Tests (pytest tests/) ────────────────────────────────────────────────────
+pytest>=8.0.0

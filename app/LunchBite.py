@@ -402,15 +402,24 @@ for message in service.shadow_warnings():
     st.warning(message)
 
 # First call opens ChromaDB and loads the embedding model, which takes a good
-# fifteen seconds cold and renders nothing while it happens. The spinner is the
-# difference between "starting up" and "broken"; the result is cached, so every
-# later rerun passes straight through.
+# fifteen seconds cold and renders nothing while it happens -- and on a fresh
+# deployment it also builds the index and downloads the model, which is a
+# minute or two. The spinner is the difference between "starting up" and
+# "broken"; the result is cached, so every later rerun passes straight through.
 with st.spinner("Opening the recipe index and loading the embedding model. "
-                "This happens once per server start."):
+                "On a fresh deployment this also builds the index and "
+                "downloads the models -- a minute or two, once per server."):
     index = service.index_status()
 
 if not index["ok"]:
-    st.error("**The recipe index is not built**, so retrieval cannot run.")
+    # `service.ensure_index` already tried to build it, so reaching here means
+    # the build itself failed -- most often no network for the model download.
+    # The local remedy is still worth printing; deployed, there is no shell to
+    # print it to, so the error text is what has to carry the diagnosis.
+    st.error("**The recipe index is unavailable**, so retrieval cannot run.")
+    st.caption("Building it needs network access to download the embedding "
+               "model (~90 MB, cached afterwards). Locally you can build it "
+               "ahead of time:")
     st.code("python src/setup_database.py", language="bash")
     st.caption(index["error"])
     st.stop()

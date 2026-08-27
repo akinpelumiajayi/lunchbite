@@ -1,5 +1,9 @@
 # Secrets — never commit
 .env
+# Streamlit Cloud reads secrets from its own console, not from the repo. The
+# committed template is .streamlit/secrets.toml.example; the real file is local
+# only and would otherwise be a second place a live Groq key can leak from.
+.streamlit/secrets.toml
 
 # Generated indexes — rebuilt by setup_database.py
 vectordb/
@@ -29,6 +33,18 @@ build/
 .venv/
 venv/
 env/
+
+# Node — left over from the abandoned Vercel/Cloudflare attempts. Nothing in
+# this project is a Node app; see DEPLOYMENT.md for why it cannot be one. The
+# package.json and package-lock.json that produced this directory are gone, so
+# it is orphaned and safe to delete whenever.
+node_modules/
+
+# A bare git repository left behind by a past history cleanup. Ignored rather
+# than deleted: it may hold the only copy of that history, which is not
+# verifiable from inside this working tree. Committing a repo into a repo is
+# never what is wanted, so it stays ignored until someone confirms it is spare.
+repo-cleanup.git/
 
 # OS
 .DS_Store

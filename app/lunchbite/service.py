@@ -117,12 +117,44 @@ def provider_status() -> Dict[str, Any]:
     return status
 
 
+@st.cache_resource(show_spinner=False)
+def ensure_index() -> Dict[str, Any]:
+    """
+    Builds the vector index on first use if it is missing or empty.
+
+    Locally this never fires -- `python src/setup_database.py` has already run
+    and vectordb/ is on disk. It exists for the deployed app, where it has to:
+    vectordb/ is gitignored (it is generated, and regenerating it is the point
+    of setup_database.py), so a cloud container starts with no index and no
+    shell to build one from.
+
+    Building has to happen here rather than being skipped, because
+    `get_collection` calls `get_or_create_collection` -- with no index the app
+    would not fail, it would come up holding an empty collection and quietly
+    serve BM25-only retrieval while presenting itself as the full pipeline.
+    That is the failure `health_check` was written to catch, and the deployed
+    app is exactly where nobody would be watching a console to catch it.
+
+    Cheap: the corpus is the three JSON files under data/, a few hundred chunks,
+    and the embedding model it needs is the same one the first query loads
+    anyway. Cached as a resource, so it is once per server, not once per rerun.
+    """
+    from vector_store import build_collection, get_collection
+
+    if get_collection().count() > 0:
+        return {"built": False, "chunks": get_collection().count()}
+
+    collection = build_collection(reset=True)
+    return {"built": True, "chunks": collection.count()}
+
+
 @st.cache_data(ttl=30, show_spinner=False)
 def index_status() -> Dict[str, Any]:
     """ChromaDB collection health. `ok=False` means the index needs building."""
     try:
         from vector_store import health_check
 
+        ensure_index()
         return {"ok": True, "detail": health_check(), "error": None}
     except Exception as exc:
         return {"ok": False, "detail": {}, "error": str(exc)}
